@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Elantra N Theta II Telemetry Analyzer v13.6.3</title>
+<title>Elantra N Theta II Telemetry Analyzer v13.6.4</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
@@ -11,70 +11,63 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
-  body{background:#020617;color:#e2e8f0} .panel{background:rgba(15,23,42,.82);border:1px solid #1e293b;border-radius:1rem}
-  .metric{background:rgba(15,23,42,.72);border:1px solid #1e293b;border-radius:1rem;padding:1rem}
-  .channel{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;padding:.5rem .65rem;border:1px solid #1e293b;border-radius:.6rem;text-align:left;font:11.5px ui-monospace,monospace}
-  .channel.active{border-color:#0891b2;background:#083344;color:#a5f3fc}
-  .channel:not(.active){background:#0f172a;color:#94a3b8}
+  body{background:#050103;color:#f1f5f9}
+  .panel{background:rgba(20,5,10,.82);border:1px solid #3b0716;border-radius:1rem}
+  .metric{background:rgba(20,5,10,.72);border:1px solid #3b0716;border-radius:1rem;padding:1rem}
+  .channel{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;padding:.5rem .65rem;border:1px solid #3b0716;border-radius:.6rem;text-align:left;font:11.5px ui-monospace,monospace}
+  .channel.active{border-color:#e11d48;background:#4c0519;color:#ffe4e6}
+  .channel:not(.active){background:#14050a;color:#94a3b8}
   .pill{font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-radius:999px;padding:.2rem .55rem;border:1px solid}
-  .good{color:#6ee7b7;border-color:#065f46;background:#064e3b33}.warn{color:#fcd34d;border-color:#92400e;background:#78350f33}.bad{color:#fda4af;border-color:#9f1239;background:#88133733}.neutral{color:#cbd5e1;border-color:#475569;background:#33415533}
+  .good{color:#4ade80;border-color:#14532d;background:#052e1633}
+  .warn{color:#fbbf24;border-color:#78350f;background:#451a0333}
+  .bad{color:#fda4af;border-color:#9f1239;background:#88133733}
+  .neutral{color:#cbd5e1;border-color:#475569;background:#33415533}
   .cherry-brand{color:#fda4af;border-color:#be123c;background:#88133733}
-  select,input[type=number]{background:#0f172a;border:1px solid #334155;border-radius:.5rem;padding:.4rem;color:#e2e8f0}
+  select,input[type=number]{background:#14050a;border:1px solid #4c0519;border-radius:.5rem;padding:.4rem;color:#f1f5f9}
   .tab{padding:.8rem .2rem;border-bottom:2px solid transparent;color:#94a3b8;font-size:.875rem}
-  .tab.active{border-color:#06b6d4;color:#67e8f9}
-  th,td{padding:.65rem .75rem;border-bottom:1px solid #1e293b;text-align:left;font-size:.8rem;white-space:nowrap}
+  .tab.active{border-color:#e11d48;color:#fda4af}
+  th,td{padding:.65rem .75rem;border-bottom:1px solid #2b0611;text-align:left;font-size:.8rem;white-space:nowrap}
   th{color:#94a3b8;font-weight:600;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em}
   .small{font-size:.75rem;color:#94a3b8}
-  .highlight-row{background:rgba(6,182,212,0.22) !important; border-left: 3px solid #06b6d4}
+  .highlight-row{background:rgba(225,29,72,0.22) !important; border-left: 3px solid #e11d48}
   .logo-glow{filter: drop-shadow(0 0 10px rgba(225, 29, 72, 0.45));}
 </style>
 </head>
 <body class="min-h-screen font-sans">
-<header class="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/95 backdrop-blur px-5 py-3.5">
+<header class="sticky top-0 z-30 border-b border-rose-950/80 bg-black/95 backdrop-blur px-5 py-3.5">
  <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
   <div class="flex items-center gap-3.5">
-   <div class="p-2 rounded-xl bg-slate-900 border border-rose-950 flex items-center justify-center logo-glow">
-    <!-- Cherry Tuning Gear-Cherry SVG Logo -->
+   <div class="p-2 rounded-xl bg-black border border-rose-900/60 flex items-center justify-center logo-glow">
     <svg class="w-9 h-9" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="cherryGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#fb7185"/>
-          <stop offset="100%" stop-color="#e11d48"/>
-        </radialGradient>
-      </defs>
-      <!-- Leaf -->
       <path d="M26 15 C26 15, 45 4, 62 12 C66 14, 68 18, 64 22 C52 30, 32 26, 26 15 Z" fill="#e11d48" stroke="#be123c" stroke-width="1.5" />
       <path d="M28 15 C38 17, 50 16, 62 13" stroke="#fda4af" stroke-width="1.2" stroke-linecap="round" />
-      <!-- Stems -->
       <path d="M57 18 C68 28, 77 42, 69 61" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
       <path d="M56 19 C48 30, 42 38, 33 46" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
-      <!-- Left Cherry Gear (12 teeth) -->
       <g transform="translate(30, 52)">
         <path d="M 0 -18 L 3 -18 L 3.8 -14.8 L 7.5 -16.2 L 9.8 -14 L 7.2 -11.9 L 10.3 -9.2 L 13.5 -10.1 L 15 -7.5 L 12.1 -5.8 L 14.5 -2.7 L 18 -2.4 L 18 1.4 L 14.5 2.1 L 12.8 5.4 L 15.2 7.8 L 13.2 10.5 L 9.9 9.2 L 7.6 12.1 L 9.1 15.2 L 6.5 17.1 L 3.8 14.5 L 0.5 15.6 L 0 19 L -3.5 18.5 L -3.8 15 L -7.2 13.5 L -9.5 15.8 L -12.1 13.5 L -10.2 10.5 L -13.5 8.2 L -16.8 9.1 L -18 6.2 L -14.5 4.1 L -15.2 0.5 L -18.5 -1.2 L -18 -4.5 L -14.5 -4.8 L -13.2 -8.5 L -16.1 -10.5 L -14 -13.5 L -10.5 -12.1 L -7.8 -14.8 L -8.5 -18 L -5 -18.8 L -3.2 -15.6 Z" fill="none" stroke="#e11d48" stroke-width="3.2" stroke-linejoin="round" />
-        <circle cx="0" cy="0" r="10" fill="#020617" stroke="#e11d48" stroke-width="3" />
+        <circle cx="0" cy="0" r="10" fill="#050103" stroke="#e11d48" stroke-width="3" />
       </g>
-      <!-- Right Cherry Gear (12 teeth) -->
       <g transform="translate(60, 68)">
         <path d="M 0 -24 L 4 -24 L 5 -19.5 L 10 -21.5 L 13 -18.5 L 9.5 -15.5 L 13.8 -12 L 18 -13.2 L 20 -9.8 L 16.2 -7.5 L 19.5 -3.5 L 24 -3 L 24 1.8 L 19.5 2.8 L 17.2 7.2 L 20.2 10.5 L 17.5 14 L 13.2 12.2 L 10.2 16.2 L 12.2 20.2 L 8.8 22.8 L 5 19.5 L 0.8 20.8 L 0 25.2 L -4.8 24.5 L -5 20 L -9.5 18 L -12.8 21 L -16.2 18 L -13.5 14 L -18 11 L -22.2 12.2 L -24 8.2 L -19.5 5.5 L -20.2 0.8 L -24.8 -1.5 L -24 -6 L -19.5 -6.5 L -17.5 -11.2 L -21.5 -14 L -18.8 -18 L -14 -16.2 L -10.5 -19.8 L -11.5 -24 L -6.8 -25 L -4.2 -20.8 Z" fill="none" stroke="#e11d48" stroke-width="3.8" stroke-linejoin="round" />
-        <circle cx="0" cy="0" r="13.5" fill="#020617" stroke="#e11d48" stroke-width="3.5" />
+        <circle cx="0" cy="0" r="13.5" fill="#050103" stroke="#e11d48" stroke-width="3.5" />
       </g>
     </svg>
    </div>
    <div>
     <div class="flex items-center gap-2 flex-wrap">
-      <h1 class="text-xl font-bold text-white tracking-tight">Elantra N Theta II Analyzer <span class="text-rose-500 font-mono text-sm">v13.6.3</span></h1>
-      <span class="pill cherry-brand font-semibold">Cherry Tuning Powered</span>
+      <h1 class="text-xl font-bold text-white tracking-tight">Elantra N Theta II Analyzer <span class="text-rose-500 font-mono text-sm">v13.6.4</span></h1>
+      <span class="pill cherry-brand font-semibold">Cherry Tuning Suite</span>
       <span class="pill good">SIM2K-250 Calibrated</span>
     </div>
-    <p class="small text-slate-400">Theta II 2.0 T-GDI · Measured GDI Duration (ms) · Flywheel Crank / Raw Default · Cherry Logger Suite</p>
+    <p class="small text-slate-400">Theta II 2.0 T-GDI · Physical GDI Injection Timing · Cherry Red Theme</p>
    </div>
   </div>
   <div class="flex flex-wrap gap-2">
-   <button id="sample-btn" class="rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-cyan-300 hover:bg-slate-700">Load sample WOT</button>
-   <button id="sample-daily-btn" class="rounded-lg bg-slate-800 border border-amber-600/70 px-3 py-2 text-xs text-amber-300 hover:bg-slate-700">Load sample Daily</button>
-   <label class="cursor-pointer rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950">Upload CSV/TXT<input id="file-input" type="file" accept=".csv,.txt" class="hidden"></label>
-   <label class="cursor-pointer rounded-lg bg-slate-800 border border-violet-500 px-3 py-2 text-xs text-violet-300">Compare log<input id="cmp-input" type="file" accept=".csv,.txt" class="hidden"></label>
-   <button id="report-btn" disabled class="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-slate-950 disabled:opacity-30">Export report</button>
+   <button id="sample-btn" class="rounded-lg bg-rose-950/60 border border-rose-800/80 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-900/60 transition">Load sample WOT</button>
+   <button id="sample-daily-btn" class="rounded-lg bg-amber-950/40 border border-amber-800/60 px-3 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-900/40 transition">Load sample Daily</button>
+   <label class="cursor-pointer rounded-lg bg-rose-600 hover:bg-rose-500 transition px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-950/50">Upload CSV/TXT<input id="file-input" type="file" accept=".csv,.txt" class="hidden"></label>
+   <label class="cursor-pointer rounded-lg bg-slate-900 border border-rose-900/60 px-3 py-2 text-xs text-rose-300 hover:bg-slate-800 transition">Compare log<input id="cmp-input" type="file" accept=".csv,.txt" class="hidden"></label>
+   <button id="report-btn" disabled class="rounded-lg bg-rose-700 hover:bg-rose-600 transition px-3 py-2 text-xs font-bold text-white disabled:opacity-30">Export report</button>
   </div>
  </div>
 </header>
@@ -87,73 +80,71 @@
       <path d="M56 19 C48 30, 42 38, 33 46" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
       <g transform="translate(30, 52)">
         <path d="M 0 -18 L 3 -18 L 3.8 -14.8 L 7.5 -16.2 L 9.8 -14 L 7.2 -11.9 L 10.3 -9.2 L 13.5 -10.1 L 15 -7.5 L 12.1 -5.8 L 14.5 -2.7 L 18 -2.4 L 18 1.4 L 14.5 2.1 L 12.8 5.4 L 15.2 7.8 L 13.2 10.5 L 9.9 9.2 L 7.6 12.1 L 9.1 15.2 L 6.5 17.1 L 3.8 14.5 L 0.5 15.6 L 0 19 L -3.5 18.5 L -3.8 15 L -7.2 13.5 L -9.5 15.8 L -12.1 13.5 L -10.2 10.5 L -13.5 8.2 L -16.8 9.1 L -18 6.2 L -14.5 4.1 L -15.2 0.5 L -18.5 -1.2 L -18 -4.5 L -14.5 -4.8 L -13.2 -8.5 L -16.1 -10.5 L -14 -13.5 L -10.5 -12.1 L -7.8 -14.8 L -8.5 -18 L -5 -18.8 L -3.2 -15.6 Z" fill="none" stroke="#e11d48" stroke-width="3.2" stroke-linejoin="round" />
-        <circle cx="0" cy="0" r="10" fill="#020617" stroke="#e11d48" stroke-width="3" />
+        <circle cx="0" cy="0" r="10" fill="#050103" stroke="#e11d48" stroke-width="3" />
       </g>
       <g transform="translate(60, 68)">
         <path d="M 0 -24 L 4 -24 L 5 -19.5 L 10 -21.5 L 13 -18.5 L 9.5 -15.5 L 13.8 -12 L 18 -13.2 L 20 -9.8 L 16.2 -7.5 L 19.5 -3.5 L 24 -3 L 24 1.8 L 19.5 2.8 L 17.2 7.2 L 20.2 10.5 L 17.5 14 L 13.2 12.2 L 10.2 16.2 L 12.2 20.2 L 8.8 22.8 L 5 19.5 L 0.8 20.8 L 0 25.2 L -4.8 24.5 L -5 20 L -9.5 18 L -12.8 21 L -16.2 18 L -13.5 14 L -18 11 L -22.2 12.2 L -24 8.2 L -19.5 5.5 L -20.2 0.8 L -24.8 -1.5 L -24 -6 L -19.5 -6.5 L -17.5 -11.2 L -21.5 -14 L -18.8 -18 L -14 -16.2 L -10.5 -19.8 L -11.5 -24 L -6.8 -25 L -4.2 -20.8 Z" fill="none" stroke="#e11d48" stroke-width="3.8" stroke-linejoin="round" />
-        <circle cx="0" cy="0" r="13.5" fill="#020617" stroke="#e11d48" stroke-width="3.5" />
+        <circle cx="0" cy="0" r="13.5" fill="#050103" stroke="#e11d48" stroke-width="3.5" />
       </g>
     </svg>
   </div>
   <h2 class="text-xl font-semibold text-white mb-2">Load a Cherry Tuning Telemetry File</h2>
   <p class="max-w-xl text-sm text-slate-400 mb-5">Analyze EK1 and Cherry SimK250 CSV datalogs with physical injector pulse widths, sub-frame linear Dragy splits, and debounced calibration scoring.</p>
   <div class="flex gap-3">
-    <button id="sample-empty" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 text-xs">Load Sample WOT</button>
-    <button id="sample-daily-empty" class="rounded-lg bg-slate-800 border border-amber-500 px-4 py-2 font-semibold text-amber-300 text-xs">Load Sample Daily</button>
+    <button id="sample-empty" class="rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-white px-4 py-2 text-xs transition">Load Sample WOT</button>
+    <button id="sample-daily-empty" class="rounded-lg bg-rose-950/60 border border-rose-800 px-4 py-2 font-semibold text-rose-300 text-xs hover:bg-rose-900 transition">Load Sample Daily</button>
   </div>
  </div>
  <section id="workspace" class="hidden space-y-5">
   <div class="panel p-4 flex flex-wrap items-center justify-between gap-3">
    <div><div id="filename" class="font-semibold text-white">Log</div><div id="rowinfo" class="small">0 rows</div></div>
    <div class="flex flex-wrap items-center gap-3">
-     <div id="lock-status" class="hidden text-xs bg-cyan-950/80 border border-cyan-500/60 text-cyan-300 px-2.5 py-1.5 rounded-lg flex items-center gap-2">
+     <div id="lock-status" class="hidden text-xs bg-rose-950/80 border border-rose-600/60 text-rose-300 px-2.5 py-1.5 rounded-lg flex items-center gap-2">
        <span>Locked: Row <b id="lock-row-num">-</b></span>
        <button id="unlock-btn" class="underline hover:text-white">Unlock</button>
      </div>
-     <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none bg-slate-900 border border-slate-800 rounded-lg py-1 px-2.5">
-       <input id="shift-link-toggle" type="checkbox" class="rounded border-slate-700 text-cyan-500">
+     <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none bg-black/60 border border-rose-950 rounded-lg py-1 px-2.5">
+       <input id="shift-link-toggle" type="checkbox" class="rounded border-rose-900 text-rose-500">
        <span>Link Multi-Gear Pulls</span>
      </label>
      <label class="small">X axis <select id="xaxis" class="ml-2"></select></label>
      <label class="small">Pull focus <select id="pull-select" class="ml-2"><option value="all">Entire log</option></select></label>
-     <button id="export-pull-btn" class="rounded-lg bg-slate-800 border border-slate-700 px-3 py-1.5 text-xs text-cyan-300 hover:bg-slate-700">Export Current View (.csv)</button>
+     <button id="export-pull-btn" class="rounded-lg bg-rose-950/60 border border-rose-800/80 px-3 py-1.5 text-xs text-rose-300 hover:bg-rose-900/60 transition">Export Current View (.csv)</button>
    </div>
   </div>
   <div id="warnings" class="space-y-2"></div>
   <div id="pull-card" class="panel p-4 hidden"></div>
   
-  <!-- DUAL-MODE EXECUTIVE SCORECARD TILES -->
   <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
-   <div class="metric cursor-pointer hover:border-cyan-500 transition" id="scorecard-tile" title="Click for detailed point deduction breakdown">
-     <div class="flex items-center justify-between"><div class="small" id="s-score-title">Health Score</div><i data-lucide="info" class="w-3.5 h-3.5 text-cyan-400"></i></div>
-     <div id="s-score" class="text-2xl font-black text-cyan-300">--</div>
+   <div class="metric cursor-pointer hover:border-rose-500 transition" id="scorecard-tile" title="Click for detailed point deduction breakdown">
+     <div class="flex items-center justify-between"><div class="small" id="s-score-title">Health Score</div><i data-lucide="info" class="w-3.5 h-3.5 text-rose-400"></i></div>
+     <div id="s-score" class="text-2xl font-black text-rose-400">--</div>
      <div id="score-sub" class="small truncate">Evaluating telemetry...</div>
    </div>
-   <div class="metric"><div class="small" id="s-hp-title">ECU Crank Power</div><div id="s-ecu-hp" class="text-xl font-bold text-emerald-300">N/A</div><div id="hp-sub" class="small truncate">Flywheel model</div></div>
-   <div class="metric"><div class="small" id="s-tq-title">ECU Crank Torque</div><div id="s-ecu-tq" class="text-xl font-bold text-teal-300">N/A</div><div id="tq-sub" class="small truncate">Flywheel model</div></div>
-   <div class="metric"><div class="small" id="s-boost-title">Actual boost peak</div><div id="s-boost" class="text-xl font-bold text-violet-300">N/A</div><div id="s-target" class="small truncate">Target: N/A</div></div>
-   <div class="metric"><div class="small" id="s-fuel-title">Rail pressure min</div><div id="s-railmin" class="text-xl font-bold text-rose-300">N/A</div><div class="small truncate" id="s-fuel-sub">Active window</div></div>
+   <div class="metric"><div class="small" id="s-hp-title">ECU Crank Power</div><div id="s-ecu-hp" class="text-xl font-bold text-rose-300">N/A</div><div id="hp-sub" class="small truncate">Flywheel model</div></div>
+   <div class="metric"><div class="small" id="s-tq-title">ECU Crank Torque</div><div id="s-ecu-tq" class="text-xl font-bold text-pink-300">N/A</div><div id="tq-sub" class="small truncate">Flywheel model</div></div>
+   <div class="metric"><div class="small" id="s-boost-title">Actual boost peak</div><div id="s-boost" class="text-xl font-bold text-rose-200">N/A</div><div id="s-target" class="small truncate">Target: N/A</div></div>
+   <div class="metric"><div class="small" id="s-fuel-title">Rail pressure min</div><div id="s-railmin" class="text-xl font-bold text-red-400">N/A</div><div class="small truncate" id="s-fuel-sub">Active window</div></div>
    <div class="metric"><div class="small" id="s-feed-title">LPFP Feed Min</div><div id="s-lpfpmin" class="text-xl font-bold text-amber-300">N/A</div><div id="lpfp-sub" class="small truncate">Lift pump PSI</div></div>
-   <div class="metric"><div class="small" id="s-temp-title">ECT / EOT Warmup</div><div id="s-iat" class="text-xl font-bold text-cyan-300">N/A</div><div id="iat-delta-sub" class="small truncate">Thermostat track</div></div>
-   <div class="metric"><div class="small" id="s-knock-title">Knock extrema</div><div id="s-knock" class="text-lg font-bold text-rose-300">N/A</div><div id="k-sub" class="small truncate">Status filtered</div></div>
+   <div class="metric"><div class="small" id="s-temp-title">ECT / EOT Warmup</div><div id="s-iat" class="text-xl font-bold text-rose-300">N/A</div><div id="iat-delta-sub" class="small truncate">Thermostat track</div></div>
+   <div class="metric"><div class="small" id="s-knock-title">Knock extrema</div><div id="s-knock" class="text-lg font-bold text-red-400">N/A</div><div id="k-sub" class="small truncate">Status filtered</div></div>
   </div>
 
-  <!-- SCORECARD BREAKDOWN MODAL -->
-  <div id="score-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="panel p-6 max-w-md w-full space-y-4 border border-cyan-500/40 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2" id="modal-audit-title"><i data-lucide="shield-check" class="text-cyan-400"></i> Health Audit Breakdown</h3>
+  <div id="score-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="panel p-6 max-w-md w-full space-y-4 border border-rose-500/40 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-rose-950 pb-3">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2" id="modal-audit-title"><i data-lucide="shield-check" class="text-rose-400"></i> Health Audit Breakdown</h3>
         <button id="close-score-modal" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
       </div>
       <div class="space-y-2 text-sm" id="score-breakdown-list"></div>
-      <div class="pt-3 border-t border-slate-800 flex justify-between items-center font-bold">
+      <div class="pt-3 border-t border-rose-950 flex justify-between items-center font-bold">
         <span>Evaluated Score:</span>
-        <span id="modal-final-score" class="text-xl text-cyan-300">100 / 100</span>
+        <span id="modal-final-score" class="text-xl text-rose-400">100 / 100</span>
       </div>
     </div>
   </div>
 
-  <nav class="flex gap-6 border-b border-slate-800">
+  <nav class="flex gap-6 border-b border-rose-950/80">
     <button class="tab active" data-tab="chart-panel">Telemetry chart</button>
     <button class="tab" data-tab="power-panel">Dyno & ECU Power Suite</button>
     <button class="tab" data-tab="compressor-panel">Compressor Map & Flow</button>
@@ -169,21 +160,27 @@
        <span class="text-[10px] text-slate-400">1-Click Layouts</span>
      </div>
      <div class="grid grid-cols-2 gap-1.5 text-xs">
-       <button id="p-boost" class="rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 py-1.5 text-cyan-300">Spool & Boost</button>
-       <button id="p-fuel" class="rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 py-1.5 text-emerald-300">Fueling Safety</button>
-       <button id="p-ign" class="rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 py-1.5 text-rose-300">Ignition & Knock</button>
-       <button id="p-daily" class="rounded bg-slate-900 hover:bg-slate-800 border border-amber-600/60 py-1.5 text-amber-300 font-semibold">Daily / Cruise</button>
-       <button id="p-chassis" class="col-span-2 rounded bg-slate-900 hover:bg-slate-800 border border-violet-500/60 py-1.5 text-violet-300 font-semibold">Chassis & e-LSD (KDMLink)</button>
+       <button id="p-boost" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-rose-300">Spool & Boost</button>
+       <button id="p-fuel" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-red-300">Fueling Safety</button>
+       <button id="p-ign" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-pink-300">Ignition & Knock</button>
+       <button id="p-daily" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-amber-800/60 py-1.5 text-amber-300 font-semibold">Daily / Cruise</button>
+       <button id="p-chassis" class="col-span-2 rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-rose-200 font-semibold">Chassis & e-LSD (KDMLink)</button>
      </div>
-     <input id="chan-search" type="search" placeholder="Search channels" class="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200">
+     <input id="chan-search" type="search" placeholder="Search channels" class="w-full rounded-lg border border-rose-950 bg-black/60 px-3 py-2 text-xs text-slate-200">
      <div id="channels" class="space-y-1.5 max-h-[260px] md:max-h-[460px] overflow-auto"></div>
    </div>
-   <div class="panel p-4 lg:col-span-3"><div class="flex flex-wrap justify-between gap-2 mb-3"><div><h3 class="font-semibold text-white">Synchronized telemetry</h3><p class="small"><b>Click any point</b> to lock inspection on that row. Drag to pan, scroll to zoom.</p></div><button id="reset-chart" class="text-xs border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300">Reset zoom / view</button></div><div class="relative h-[340px] md:h-[480px]"><canvas id="chart"></canvas></div></div>
+   <div class="panel p-4 lg:col-span-3">
+    <div class="flex flex-wrap justify-between gap-2 mb-3">
+      <div><h3 class="font-semibold text-white">Synchronized telemetry</h3><p class="small"><b>Click any point</b> to lock inspection on that row. Drag to pan, scroll to zoom.</p></div>
+      <button id="reset-chart" class="text-xs border border-rose-900/80 rounded-lg px-3 py-1.5 text-rose-300 hover:bg-rose-950/40 transition">Reset zoom / view</button>
+    </div>
+    <div class="relative h-[340px] md:h-[480px]"><canvas id="chart"></canvas></div>
+   </div>
   </section>
 
   <!-- TAB 2: PRECISION DYNO & ECU POWER SUITE -->
   <section id="power-panel" class="hidden panel p-5 space-y-4">
-   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+   <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-rose-950 pb-4">
     <div>
       <div class="flex items-center gap-2">
         <h3 class="font-semibold text-white text-base">Virtual Dyno & ECU Power Model</h3>
@@ -192,56 +189,55 @@
       <p class="small">Symmetrical HP/TQ scaling crossing at 5,252 RPM · Flywheel & Raw Defaults · Apex Rings</p>
     </div>
     <div class="flex flex-wrap items-center gap-3 text-xs">
-      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+      <div class="flex items-center gap-2 bg-black/60 border border-rose-950 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Output Mode:</label>
-        <select id="dyno-mode" class="text-xs py-1 px-2 border-slate-700">
+        <select id="dyno-mode" class="text-xs py-1 px-2 border-rose-900/80">
           <option value="crank" selected>Flywheel / Crank (ECU Model)</option>
           <option value="wheel">Wheel Output (WHP / WTQ)</option>
         </select>
       </div>
-      <div id="dyno-loss-wrap" style="opacity: 0.4;" class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+      <div id="dyno-loss-wrap" style="opacity: 0.4;" class="flex items-center gap-2 bg-black/60 border border-rose-950 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Drivetrain Loss:</label>
-        <input id="dyno-loss" type="number" value="13.0" min="5" max="25" step="0.5" class="w-16 py-1 px-1.5 text-xs text-center border-slate-700">
+        <input id="dyno-loss" type="number" value="13.0" min="5" max="25" step="0.5" class="w-16 py-1 px-1.5 text-xs text-center border-rose-900/80">
         <span class="text-slate-400">%</span>
       </div>
-      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+      <div class="flex items-center gap-2 bg-black/60 border border-rose-950 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Weather Norm:</label>
-        <select id="dyno-sae" class="text-xs py-1 px-2 border-slate-700">
+        <select id="dyno-sae" class="text-xs py-1 px-2 border-rose-900/80">
           <option value="sae">SAE J1349 Corrected</option>
           <option value="raw" selected>Raw / Uncorrected</option>
         </select>
       </div>
-      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+      <div class="flex items-center gap-2 bg-black/60 border border-rose-950 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Overlay Pull:</label>
-        <select id="dyno-overlay-select" class="text-xs py-1 px-2 border-slate-700">
+        <select id="dyno-overlay-select" class="text-xs py-1 px-2 border-rose-900/80">
           <option value="none">None</option>
         </select>
       </div>
-      <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+      <div class="flex items-center gap-2 bg-black/60 border border-rose-950 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Smoothing:</label>
-        <input id="dyno-smoothing" type="number" value="3" min="0" max="7" step="1" class="w-12 py-1 px-1 text-xs text-center border-slate-700">
+        <input id="dyno-smoothing" type="number" value="3" min="0" max="7" step="1" class="w-12 py-1 px-1 text-xs text-center border-rose-900/80">
       </div>
-      <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer select-none bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5">
-        <input id="dyno-flow-toggle" type="checkbox" checked class="rounded border-slate-700 text-amber-500">
+      <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer select-none bg-black/60 border border-rose-950 rounded-lg py-1.5 px-2.5">
+        <input id="dyno-flow-toggle" type="checkbox" checked class="rounded border-rose-900 text-rose-500">
         <span>Airflow Potential</span>
       </label>
-      <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer select-none bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5">
-        <input id="dyno-knock-toggle" type="checkbox" checked class="rounded border-slate-700 text-rose-500">
+      <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer select-none bg-black/60 border border-rose-950 rounded-lg py-1.5 px-2.5">
+        <input id="dyno-knock-toggle" type="checkbox" checked class="rounded border-rose-900 text-red-500">
         <span>Knock & Lost Power</span>
       </label>
     </div>
    </div>
 
-   <!-- DYNO HIGHLIGHT BANNER -->
    <div id="dyno-stats-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
      <div class="metric py-2.5 px-3">
        <div class="small">Peak Power Output</div>
-       <div id="dyno-pk-hp" class="text-lg font-bold text-emerald-400">N/A</div>
+       <div id="dyno-pk-hp" class="text-lg font-bold text-rose-400">N/A</div>
        <div id="dyno-pk-hp-rpm" class="small text-slate-400">@ --- RPM</div>
      </div>
      <div class="metric py-2.5 px-3">
        <div class="small">Peak Torque Output</div>
-       <div id="dyno-pk-tq" class="text-lg font-bold text-teal-300">N/A</div>
+       <div id="dyno-pk-tq" class="text-lg font-bold text-pink-400">N/A</div>
        <div id="dyno-pk-tq-rpm" class="small text-slate-400">@ --- RPM</div>
      </div>
      <div class="metric py-2.5 px-3">
@@ -251,7 +247,7 @@
      </div>
      <div class="metric py-2.5 px-3">
        <div class="small" id="dyno-cmp-title">Comparison Delta</div>
-       <div id="dyno-cmp-delta" class="text-lg font-bold text-violet-300">No Overlay Active</div>
+       <div id="dyno-cmp-delta" class="text-lg font-bold text-rose-300">No Overlay Active</div>
        <div id="dyno-cmp-sub" class="small text-slate-400">Select Overlay Pull above</div>
      </div>
    </div>
@@ -261,12 +257,12 @@
 
   <!-- TAB 3: COMPRESSOR MAP & AIRFLOW -->
   <section id="compressor-panel" class="hidden panel p-5 space-y-4">
-   <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+   <div class="border-b border-rose-950 pb-3 flex items-center justify-between">
     <div>
       <h3 class="font-semibold text-white">Turbocharger Operating Point & Mass Airflow</h3>
       <p class="small">Pressure Ratio ($P_R$) vs Measured Mass Airflow (lb/min) plotted across WOT window</p>
     </div>
-    <div id="baro-tag" class="text-xs bg-slate-900 border border-slate-800 rounded px-2.5 py-1 text-slate-400">Baro: 14.50 PSI (Midlands Default)</div>
+    <div id="baro-tag" class="text-xs bg-black/60 border border-rose-950 rounded px-2.5 py-1 text-slate-400">Baro: 14.50 PSI (Midlands Default)</div>
    </div>
    <div class="relative h-[380px] md:h-[500px]"><canvas id="compressor-chart"></canvas></div>
   </section>
@@ -275,29 +271,26 @@
   <section id="diag-panel" class="hidden space-y-4">
    <div class="panel p-5"><h3 class="font-semibold text-white mb-2">Diagnostic findings</h3><p class="small mb-4">Click <b>Jump to Event</b> on any finding to instantly focus the chart and inspector on that exact millisecond.</p><div id="findings" class="grid md:grid-cols-2 gap-3"></div></div>
    
-   <!-- UNIVERSAL LIVE CALIBRATION SETTINGS PANEL -->
    <div class="panel p-5 space-y-3">
-     <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+     <div class="flex items-center justify-between border-b border-rose-950 pb-2">
        <div>
          <h3 class="font-semibold text-white">Platform Calibration & Safety Thresholds</h3>
          <p class="small">Fine-tune detection tolerances to your specific fuel and hardware. Updates all tabs live.</p>
        </div>
-       <button id="reset-settings-btn" class="text-xs border border-slate-700 hover:border-slate-500 rounded px-2.5 py-1 text-slate-300">Reset Defaults</button>
+       <button id="reset-settings-btn" class="text-xs border border-rose-900 hover:border-rose-700 rounded px-2.5 py-1 text-rose-300 transition">Reset Defaults</button>
      </div>
      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-300 pt-1">
-       <!-- HPFP / LPFP Settings -->
-       <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-lg space-y-2">
-         <div class="font-bold text-cyan-400">HPFP & In-Tank LPFP Limits</div>
+       <div class="bg-black/60 border border-rose-950 p-3 rounded-lg space-y-2">
+         <div class="font-bold text-rose-400">HPFP & In-Tank LPFP Limits</div>
          <label class="flex items-center justify-between">HPFP Caution above %: <input id="rail-a" type="number" value="5" min="0.5" step="0.5" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">HPFP Review above %: <input id="rail-b" type="number" value="10" min="1" step="0.5" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">HPFP Consecutive frames: <input id="rail-n" type="number" value="5" min="1" step="1" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">LPFP Lift Floor (PSI): <input id="lpfp-floor" type="number" value="70.0" min="50" max="85" step="1" class="w-16 text-center"></label>
        </div>
-       <!-- Knock & Fueling Thresholds -->
-       <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-lg space-y-2">
-         <div class="font-bold text-emerald-400">Fuel & Knock Safety</div>
+       <div class="bg-black/60 border border-rose-950 p-3 rounded-lg space-y-2">
+         <div class="font-bold text-pink-400">Fuel & Knock Safety</div>
          <label class="flex items-center justify-between">Fuel Blend Profile: 
-           <select id="fuel-profile" class="text-xs py-1 px-1.5 border-slate-700">
+           <select id="fuel-profile" class="text-xs py-1 px-1.5 border-rose-900/80">
              <option value="e10" selected>Pump 93 (E10)</option>
              <option value="e20">E20 Splash Blend</option>
              <option value="e30">E30 Custom Blend</option>
@@ -308,9 +301,8 @@
          <label class="flex items-center justify-between">Max Lean Margin (&Delta;&lambda;): <input id="lambda-margin" type="number" value="0.040" min="0.010" max="0.080" step="0.005" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">Overboost Trip (PSI): <input id="overboost-threshold" type="number" value="2.5" min="0.5" max="5.0" step="0.1" class="w-16 text-center"></label>
        </div>
-       <!-- Pull Detection & Drivetrain -->
-       <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-lg space-y-2">
-         <div class="font-bold text-violet-400">Traction & Pull Filters</div>
+       <div class="bg-black/60 border border-rose-950 p-3 rounded-lg space-y-2">
+         <div class="font-bold text-red-400">Traction & Pull Filters</div>
          <label class="flex items-center justify-between">WOT Throttle Floor (%): <input id="wot-threshold" type="number" value="75" min="50" max="95" step="1" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">e-LSD Drop Tolerance (RPM): <input id="elsd-tolerance" type="number" value="250" min="50" max="500" step="10" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">Shift Link Window (sec): <input id="shift-window" type="number" value="1.0" min="0.3" max="2.0" step="0.1" class="w-16 text-center"></label>
@@ -319,7 +311,7 @@
    </div>
 
    <div class="panel p-5"><div class="flex flex-wrap items-center justify-between gap-2 mb-1"><h3 class="font-semibold text-white">Fuel trim map</h3><select id="trim-ch"><option value="ltft">LTFT</option><option value="stft">STFT</option></select></div><p class="small mb-3">Mean trim (%) by RPM and load (Air Mass / Stroke quintiles) for the selected window. Cells need 5+ samples.</p><div class="overflow-x-auto"><table class="w-full"><tbody id="trim-map"></tbody></table></div></div>
-   <div class="panel p-5"><div class="flex items-center justify-between mb-3"><h3 class="font-semibold text-white">Log history</h3><button id="hist-clear" class="text-xs border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300">Clear</button></div><p class="small mb-3">Best pull (highest boost) from each log you load, kept on this device.</p><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Log</th><th>Loaded</th><th>Pulls</th><th>Boost pk</th><th>Spool (PSI/s)</th><th>3k–6k (s)</th><th>Lambda min</th><th>Rail def %</th><th>Knock min</th><th>Tq pk</th></tr></thead><tbody id="hist-body"></tbody></table></div></div>
+   <div class="panel p-5"><div class="flex items-center justify-between mb-3"><h3 class="font-semibold text-white">Log history</h3><button id="hist-clear" class="text-xs border border-rose-900 rounded-lg px-3 py-1.5 text-rose-300 hover:bg-rose-950/40 transition">Clear</button></div><p class="small mb-3">Best pull (highest boost) from each log you load, kept on this device.</p><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Log</th><th>Loaded</th><th>Pulls</th><th>Boost pk</th><th>Spool (PSI/s)</th><th>3k–6k (s)</th><th>Lambda min</th><th>Rail def %</th><th>Knock min</th><th>Tq pk</th></tr></thead><tbody id="hist-body"></tbody></table></div></div>
    <div class="panel p-5"><h3 class="font-semibold text-white mb-1">Log comparison</h3><p id="cmp-note" class="small mb-3"></p><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Metric</th><th>A (current)</th><th>B (compare)</th><th>B - A</th></tr></thead><tbody id="cmp-body"></tbody></table></div></div>
    <div class="panel p-5"><h3 class="font-semibold text-white mb-1">Pull summary & Verified Acceleration Splits</h3><p class="small mb-3">One row per detected pull with sub-frame interpolated 3k–6k sweep times and intercooler soak delta.</p><div class="overflow-x-auto"><table class="w-full"><thead id="pull-head"></thead><tbody id="pull-body"></tbody></table></div></div>
    <div class="panel p-5"><h3 class="font-semibold text-white mb-3">Detected channel mapping</h3><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Signal</th><th>Mapped column</th><th>Confidence</th><th>Notes</th></tr></thead><tbody id="mapping"></tbody></table></div></div>
@@ -327,7 +319,7 @@
 
   <!-- TAB 5: DATA INSPECTOR -->
   <section id="data-panel" class="hidden panel p-4 space-y-3">
-   <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-slate-800">
+   <div class="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-rose-950">
     <div class="flex items-center gap-3">
      <h3 class="font-semibold text-white">Parsed Data Inspector</h3>
      <span id="preview-count" class="small"></span>
@@ -353,26 +345,26 @@
        <option value="all">All CSV Columns</option>
       </select>
      </label>
-     <button id="export-filtered-btn" class="rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 px-3 py-1.5 text-xs font-semibold text-cyan-300 transition">Export Filtered CSV</button>
+     <button id="export-filtered-btn" class="rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-700/60 px-3 py-1.5 text-xs font-semibold text-rose-300 transition">Export Filtered CSV</button>
     </div>
    </div>
-   <div class="overflow-x-auto overflow-y-auto max-h-[580px] rounded-lg border border-slate-800" id="inspector-container">
+   <div class="overflow-x-auto overflow-y-auto max-h-[580px] rounded-lg border border-rose-950" id="inspector-container">
     <table class="w-full text-xs">
-     <thead id="preview-head" class="sticky top-0 bg-slate-950/95 backdrop-blur z-10 border-b border-slate-800 shadow-sm"></thead>
-     <tbody id="preview-body" class="divide-y divide-slate-800/60 font-mono"></tbody>
+     <thead id="preview-head" class="sticky top-0 bg-black/95 backdrop-blur z-10 border-b border-rose-950 shadow-sm"></thead>
+     <tbody id="preview-body" class="divide-y divide-rose-950/40 font-mono"></tbody>
     </table>
    </div>
-   <div id="inspector-pagination" class="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+   <div id="inspector-pagination" class="flex items-center justify-between pt-2 border-t border-rose-950 text-xs">
      <span id="page-indicator" class="text-slate-400">Page 1</span>
      <div class="flex items-center gap-2">
-       <button id="prev-page" class="rounded border border-slate-700 bg-slate-900 px-3 py-1 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed">Previous</button>
-       <button id="next-page" class="rounded border border-slate-700 bg-slate-900 px-3 py-1 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
+       <button id="prev-page" class="rounded border border-rose-900 bg-rose-950/30 px-3 py-1 text-slate-300 hover:bg-rose-900/40 transition disabled:opacity-30 disabled:cursor-not-allowed">Previous</button>
+       <button id="next-page" class="rounded border border-rose-900 bg-rose-950/30 px-3 py-1 text-slate-300 hover:bg-rose-900/40 transition disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
      </div>
    </div>
   </section>
  </section>
  <footer class="small text-center py-4 text-slate-500 flex items-center justify-center gap-2">
-   <span>v13.6.3 · Theta II 2.0 T-GDI · Cherry Tuning / SimK250 Precision Telemetry Engine</span>
+   <span>v13.6.4 · Theta II 2.0 T-GDI · Cherry Tuning / SimK250 Precision Telemetry Engine</span>
  </footer>
 </main>
 <script>
@@ -390,7 +382,7 @@ const ROWS_PER_PAGE = 150;
 const $=id=>document.getElementById(id);
 const setTxt = (id, txt) => { const el = $(id); if(el) el.textContent = txt; };
 
-const colors=['#38bdf8','#f472b6','#fbbf24','#34d399','#a78bfa','#fb7185','#60a5fa','#f97316','#2dd4bf','#c084fc','#38bdf8','#e879f9'];
+const colors=['#e11d48','#fb7185','#f43f5e','#fda4af','#f97316','#fbbf24','#34d399','#a78bfa','#38bdf8','#c084fc','#f472b6','#e879f9'];
 const norm=s=>String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const numeric=v=>typeof v==='number'&&Number.isFinite(v);
 const fmt=(v,d=1)=>numeric(v)?v.toFixed(d):'N/A';
@@ -1008,7 +1000,7 @@ function renderPullCard(){
  const el=$('pull-card');if(!el)return;
  if(!pullData.length){el.classList.add('hidden');return;}
  el.classList.remove('hidden');
- el.innerHTML='<div class="small mb-2">Detected pulls · tap one to focus it</div>'+pullData.map((s,i)=>`<button data-p="${i}" class="block w-full text-left rounded-lg border border-slate-700 px-3 py-2 mb-2 text-xs font-mono text-slate-300">${s.label} · ${fmt(s.dur,1)} s · ${fmt(s.rpmMin,0)}-${fmt(s.rpmMax,0)} rpm · boost ${fmt(s.boostPk,1)} · 3k-6k: ${fmt(s.splitRpm,2)}s · λ min ${fmt(s.lamMin,3)} · rail ${fmt(s.railPct,1)}% · knock ${fmt(s.knockMin,2)}</button>`).join('');
+ el.innerHTML='<div class="small mb-2">Detected pulls · tap one to focus it</div>'+pullData.map((s,i)=>`<button data-p="${i}" class="block w-full text-left rounded-lg border border-rose-900/60 px-3 py-2 mb-2 text-xs font-mono text-slate-300 hover:border-rose-600 transition">${s.label} · ${fmt(s.dur,1)} s · ${fmt(s.rpmMin,0)}-${fmt(s.rpmMax,0)} rpm · boost ${fmt(s.boostPk,1)} · 3k-6k: ${fmt(s.splitRpm,2)}s · λ min ${fmt(s.lamMin,3)} · rail ${fmt(s.railPct,1)}% · knock ${fmt(s.knockMin,2)}</button>`).join('');
  el.querySelectorAll('button').forEach(b=>b.onclick=()=>{$('pull-select').value=b.dataset.p;$('pull-select').onchange();});
 }
 
@@ -1022,7 +1014,7 @@ function renderTrimMap(){
  let h='<tr><th>Load \\ RPM</th>'+rl.map(x=>`<th>${x}</th>`).join('')+'</tr>';
  for(let j=0;j<5;j++){h+=`<tr><td class="font-mono text-slate-400">${fmt(j?le[j]:0,0)}-${fmt(j===4?ls[ls.length-1]:le[j+1],0)}</td>`;
   for(let i=0;i<6;i++){const a=cell[j+'_'+i];if(!a||a.length<5){h+='<td class="text-slate-600">-</td>';continue;}const m=a.reduce((x,y)=>x+y,0)/a.length;
-   h+=`<td class="font-mono" style="background:${m<0?'rgba(244,63,94,':'rgba(56,189,248,'}${Math.min(.6,Math.abs(m)/12).toFixed(2)})" title="${a.length} samples">${fmt(m,1)}</td>`;}h+='</tr>';}
+   h+=`<td class="font-mono" style="background:${m<0?'rgba(225,29,72,':'rgba(244,63,94,'}${Math.min(.6,Math.abs(m)/12).toFixed(2)})" title="${a.length} samples">${fmt(m,1)}</td>`;}h+='</tr>';}
  el.innerHTML=h;
 }
 
@@ -1064,7 +1056,7 @@ function renderStats(){
  const scEl = $('s-score');
  if(scEl){
    scEl.textContent = sc.score !== null ? sc.score : '--';
-   scEl.className = 'text-2xl font-black ' + (sc.score >= 90 ? 'text-emerald-400' : sc.score >= 70 ? 'text-amber-400' : 'text-rose-400');
+   scEl.className = 'text-2xl font-black ' + (sc.score >= 90 ? 'text-rose-400' : sc.score >= 70 ? 'text-amber-400' : 'text-red-500');
    
    if(sc.type === 'WOT'){
      setTxt('s-score-title', 'WOT Health Score');
@@ -1190,11 +1182,11 @@ function renderChart(){
      display:true,
      title:{display:true,text:f,color:'#94a3b8'},
      ticks:{color:'#94a3b8'},
-     grid:{drawOnChartArea:i===0,color:'#1e293b'},
+     grid:{drawOnChartArea:i===0,color:'#2b0611'},
      ...(i>1?{offset:true}:{})
    };
  });
- if(!families.length)scales.y={type:'linear',position:'left',ticks:{color:'#94a3b8'},grid:{color:'#1e293b'}};
+ if(!families.length)scales.y={type:'linear',position:'left',ticks:{color:'#94a3b8'},grid:{color:'#2b0611'}};
  
  const slowChannels = /temp|iat|ect|eot|temperature|trim|stft|ltft|ambient/i;
  const datasets=selected.map((key,i)=>({
@@ -1230,10 +1222,10 @@ function renderChart(){
      plugins:{
        zoom:{zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'x'},pan:{enabled:true,mode:'x'}},
        legend:{labels:{color:'#cbd5e1'}},
-       tooltip:{backgroundColor:'#020617',borderColor:'#334155',borderWidth:1}
+       tooltip:{backgroundColor:'#050103',borderColor:'#4c0519',borderWidth:1}
      },
      scales:{
-       x:{type:'linear',ticks:{color:'#94a3b8',maxTicksLimit:14},grid:{color:'#1e293b'},title:{display:true,text:xKey,color:'#94a3b8'}},
+       x:{type:'linear',ticks:{color:'#94a3b8',maxTicksLimit:14},grid:{color:'#2b0611'},title:{display:true,text:xKey,color:'#94a3b8'}},
        ...scales
      }
    }
@@ -1352,8 +1344,8 @@ function renderEcuPower(){
  datasets.push({
    label: `Engine Power (${hpUnitLabel})`,
    data: hpPts,
-   borderColor: '#34d399',
-   backgroundColor: '#34d399',
+   borderColor: '#f43f5e',
+   backgroundColor: '#f43f5e',
    borderWidth: 2.8,
    pointRadius: 0,
    tension: 0.18,
@@ -1363,8 +1355,8 @@ function renderEcuPower(){
  datasets.push({
    label: `Engine Torque (${tqUnitLabel})`,
    data: tqPts,
-   borderColor: '#38bdf8',
-   backgroundColor: '#38bdf8',
+   borderColor: '#fda4af',
+   backgroundColor: '#fda4af',
    borderWidth: 2.8,
    pointRadius: 0,
    tension: 0.18,
@@ -1376,7 +1368,7 @@ function renderEcuPower(){
      label: `Apex Peak ${hpUnitLabel}`,
      data: [{x: primary.pkHp.rpm, y: primary.pkHp.val}],
      borderColor: '#ffffff',
-     backgroundColor: '#10b981',
+     backgroundColor: '#be123c',
      borderWidth: 2,
      pointRadius: 7,
      pointHoverRadius: 9,
@@ -1389,7 +1381,7 @@ function renderEcuPower(){
      label: `Apex Peak ${tqUnitLabel}`,
      data: [{x: primary.pkTq.rpm, y: primary.pkTq.val}],
      borderColor: '#ffffff',
-     backgroundColor: '#0284c7',
+     backgroundColor: '#9f1239',
      borderWidth: 2,
      pointRadius: 7,
      pointHoverRadius: 9,
@@ -1417,7 +1409,7 @@ function renderEcuPower(){
      label: 'Knock Retard Event',
      data: primary.knock,
      borderColor: '#ffffff',
-     backgroundColor: '#f43f5e',
+     backgroundColor: '#e11d48',
      borderWidth: 1.5,
      pointRadius: 5.5,
      pointHoverRadius: 8,
@@ -1443,8 +1435,8 @@ function renderEcuPower(){
    datasets.push({
      label: `Overlay Power: ${cmpLabel}`,
      data: applyRollingSmoothing(cmpData.hp, smoothLvl),
-     borderColor: '#2dd4bf',
-     backgroundColor: '#2dd4bf',
+     borderColor: '#fb7185',
+     backgroundColor: '#fb7185',
      borderWidth: 2.0,
      borderDash: [4, 4],
      pointRadius: 0,
@@ -1455,8 +1447,8 @@ function renderEcuPower(){
    datasets.push({
      label: `Overlay Torque: ${cmpLabel}`,
      data: applyRollingSmoothing(cmpData.tq, smoothLvl),
-     borderColor: '#c084fc',
-     backgroundColor: '#c084fc',
+     borderColor: '#f43f5e',
+     backgroundColor: '#f43f5e',
      borderWidth: 2.0,
      borderDash: [4, 4],
      pointRadius: 0,
@@ -1468,7 +1460,7 @@ function renderEcuPower(){
    const deltaTq = primary.pkTq.val - cmpData.pkTq.val;
    setTxt('dyno-cmp-title', 'Comparison Delta');
    setTxt('dyno-cmp-delta', `${deltaHp >= 0 ? '+' : ''}${deltaHp.toFixed(0)} ${hpUnitLabel} · ${deltaTq >= 0 ? '+' : ''}${deltaTq.toFixed(0)} ${tqUnitLabel}`);
-   if($('dyno-cmp-delta')) $('dyno-cmp-delta').className = `text-lg font-bold ${deltaHp >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+   if($('dyno-cmp-delta')) $('dyno-cmp-delta').className = `text-lg font-bold ${deltaHp >= 0 ? 'text-rose-400' : 'text-slate-400'}`;
    setTxt('dyno-cmp-sub', `A: ${primary.pkHp.val.toFixed(0)} vs B: ${cmpData.pkHp.val.toFixed(0)} ${hpUnitLabel}`);
  } else {
    setTxt('dyno-cmp-title', 'Overlay Mode');
@@ -1498,32 +1490,32 @@ function renderEcuPower(){
          min: minRpm,
          max: maxRpm,
          ticks: { color: '#94a3b8', stepSize: 500 },
-         grid: { color: '#1e293b' }
+         grid: { color: '#2b0611' }
        },
        y_hp: {
          type: 'linear',
          position: 'left',
-         title: { display: true, text: `Horsepower (${hpUnitLabel})`, color: '#34d399', font: { weight: 'bold' } },
+         title: { display: true, text: `Horsepower (${hpUnitLabel})`, color: '#f43f5e', font: { weight: 'bold' } },
          min: 0,
          max: yCeiling,
-         ticks: { color: '#34d399', stepSize: 50 },
-         grid: { color: '#1e293b' }
+         ticks: { color: '#f43f5e', stepSize: 50 },
+         grid: { color: '#2b0611' }
        },
        y_tq: {
          type: 'linear',
          position: 'right',
-         title: { display: true, text: `Torque (${tqUnitLabel})`, color: '#38bdf8', font: { weight: 'bold' } },
+         title: { display: true, text: `Torque (${tqUnitLabel})`, color: '#fda4af', font: { weight: 'bold' } },
          min: 0,
          max: yCeiling,
-         ticks: { color: '#38bdf8', stepSize: 50 },
+         ticks: { color: '#fda4af', stepSize: 50 },
          grid: { drawOnChartArea: false }
        }
      },
      plugins: {
        legend: { labels: { color: '#cbd5e1', usePointStyle: true, boxWidth: 8 } },
        tooltip: {
-         backgroundColor: '#020617',
-         borderColor: '#334155',
+         backgroundColor: '#050103',
+         borderColor: '#4c0519',
          borderWidth: 1,
          callbacks: {
            label: (ctx) => {
@@ -1577,8 +1569,8 @@ function renderCompressorMap(){
        {
          label:'Operating Points (Pressure Ratio vs Mass Flow)',
          data:compPts,
-         backgroundColor:'#a78bfa',
-         borderColor:'#c084fc',
+         backgroundColor:'#e11d48',
+         borderColor:'#fb7185',
          pointRadius:4
        }
      ]
@@ -1586,8 +1578,8 @@ function renderCompressorMap(){
    options:{
      responsive:true, maintainAspectRatio:false, animation:false,
      scales:{
-       x:{type:'linear', title:{display:true, text:'Measured Mass Airflow (lb/min)', color:'#94a3b8'}, min:5, max:55, ticks:{color:'#94a3b8'}, grid:{color:'#1e293b'}},
-       y:{type:'linear', title:{display:true, text:`Pressure Ratio (P2 / P1 @ ${ambientBaroPsi.toFixed(2)} PSI)`, color:'#94a3b8'}, min:1.0, max:3.4, ticks:{color:'#94a3b8'}, grid:{color:'#1e293b'}}
+       x:{type:'linear', title:{display:true, text:'Measured Mass Airflow (lb/min)', color:'#94a3b8'}, min:5, max:55, ticks:{color:'#94a3b8'}, grid:{color:'#2b0611'}},
+       y:{type:'linear', title:{display:true, text:`Pressure Ratio (P2 / P1 @ ${ambientBaroPsi.toFixed(2)} PSI)`, color:'#94a3b8'}, min:1.0, max:3.4, ticks:{color:'#94a3b8'}, grid:{color:'#2b0611'}}
      },
      plugins:{
        legend:{labels:{color:'#cbd5e1'}},
@@ -1646,8 +1638,8 @@ function addFinding(type,title,message,eventIdx=null){
  
  let jumpBtn = '';
  if(eventIdx !== null && eventIdx >= 0){
-   jumpBtn = `<div class="mt-3 pt-2 border-t border-slate-800/80 flex justify-end">
-     <button class="jump-btn text-xs bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500 text-cyan-300 px-2.5 py-1 rounded flex items-center gap-1.5 transition" data-row="${eventIdx}">
+   jumpBtn = `<div class="mt-3 pt-2 border-t border-rose-950 flex justify-end">
+     <button class="jump-btn text-xs bg-black/60 hover:bg-rose-950/60 border border-rose-900 hover:border-rose-600 text-rose-300 px-2.5 py-1 rounded flex items-center gap-1.5 transition" data-row="${eventIdx}">
        <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> Jump to Event (Row ${eventIdx + 2})
      </button>
    </div>`;
@@ -2110,11 +2102,11 @@ function restore(o){({rows,headers,detected,mappingInfo,pulls,dataNotes,pullData
 function renderWarnings(){
  const el=$('warnings');if(!el)return;el.innerHTML='';
  const add=(cls,msg)=>{const d=document.createElement('div');d.className=`rounded-lg border px-4 py-3 text-sm ${cls}`;d.textContent=msg;el.append(d);};
- dataNotes.forEach(m=>add('border-slate-700 bg-slate-900 text-slate-300',m));
+ dataNotes.forEach(m=>add('border-rose-950 bg-black/60 text-slate-300',m));
  const numericCols=headers.filter(h=>nums(rows,h).length>0);
- if(!numericCols.length)add('border-rose-700 bg-rose-950/40 text-rose-200','No numeric telemetry columns parsed.');
+ if(!numericCols.length)add('border-red-900 bg-red-950/40 text-rose-200','No numeric telemetry columns parsed.');
  const ambiguous=mappingInfo.filter(m=>m.confidence==='Ambiguous');
- if(ambiguous.length)add('border-amber-700 bg-amber-950/30 text-amber-100',`${ambiguous.length} channel mapping(s) ambiguous.`);
+ if(ambiguous.length)add('border-amber-900 bg-amber-950/30 text-amber-100',`${ambiguous.length} channel mapping(s) ambiguous.`);
 }
 
 function getFilteredInspectorRows(){
@@ -2196,20 +2188,20 @@ function renderPreview(){
            return `<td class="text-slate-500 font-mono text-[11px]">${v.toFixed(2)} (DFCO)</td>`;
          }
          if(v <= cfg.knockFloor){
-           return `<td class="text-rose-300 bg-rose-950/40 font-bold">${v.toFixed(2)}</td>`;
+           return `<td class="text-rose-300 bg-rose-950/60 font-bold">${v.toFixed(2)}</td>`;
          }
          return `<td class="text-amber-200">${v.toFixed(2)}</td>`;
        }
        if(h === c.injA && c.rpm && numeric(r[c.rpm]) && r[c.rpm] > 2000){
          const ca = (v / (120000 / r[c.rpm])) * 720;
-         if(ca > 285) return `<td class="text-rose-400 bg-rose-950/40 font-bold">${v.toFixed(2)}ms (${ca.toFixed(0)}°)</td>`;
-         return `<td class="text-emerald-300">${v.toFixed(2)}ms</td>`;
+         if(ca > 285) return `<td class="text-rose-400 bg-rose-950/60 font-bold">${v.toFixed(2)}ms (${ca.toFixed(0)}°)</td>`;
+         return `<td class="text-rose-300">${v.toFixed(2)}ms</td>`;
        }
        if(h === c.timing && v <= -5.0 && c.throttle && numeric(r[c.throttle]) && r[c.throttle] < 3.0){
          return `<td class="text-amber-400 bg-amber-950/40 font-bold">${v.toFixed(1)}° (Crackle)</td>`;
        }
        if(h === c.throttle && v >= cfg.wotFloor){
-         return `<td class="text-cyan-300 font-bold">${v.toFixed(0)}%</td>`;
+         return `<td class="text-rose-400 font-bold">${v.toFixed(0)}%</td>`;
        }
        if(h === c.rail && c.railTarget && numeric(r[c.railTarget]) && r[c.railTarget] > 0){
          const defPct = ((r[c.railTarget] - v) / r[c.railTarget]) * 100;
@@ -2218,12 +2210,12 @@ function renderPreview(){
          }
        }
        if(h === c.lpfp && v < cfg.lpfpFloor){
-         return `<td class="text-rose-400 bg-rose-950/40 font-bold">${v.toFixed(1)}</td>`;
+         return `<td class="text-rose-400 bg-rose-950/60 font-bold">${v.toFixed(1)}</td>`;
        }
        if(h === c.lambda && numeric(r[c.boost]) && r[c.boost] >= 15 && (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor))){
          const tgt = (c.lambdaTarget && numeric(r[c.lambdaTarget])) ? r[c.lambdaTarget] : 0.80;
          if((v - tgt) > cfg.lambdaMargin){
-           return `<td class="text-rose-400 bg-rose-950/50 font-bold">${v.toFixed(3)}</td>`;
+           return `<td class="text-rose-400 bg-rose-950/60 font-bold">${v.toFixed(3)}</td>`;
          }
        }
        return `<td class="text-slate-300">${typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(2)) : escapeHtml(v)}</td>`;
@@ -2429,8 +2421,8 @@ function exportReport(){
  const pt=pullTable();const mapHtml=mappingInfo.map(m=>`<tr><td>${esc(m.signal)}</td><td>${esc(m.key||'Not mapped')}</td><td>${esc(m.confidence)}</td><td>${esc(m.note)}</td></tr>`).join('');
  const knockHtml=[1,2,3,4].map(i=>{const k=c['knock'+i],x=extrema(k,data);return `<tr><td>Cylinder ${i}</td><td>${esc(k||'Not mapped')}</td><td>${x?esc(fmt(x.min,2)):'N/A'}</td><td>${x?esc(fmt(x.max,2)):'N/A'}</td></tr>`;}).join('');
  const capped=data.slice(0,5000);const dataHtml=capped.map(r=>'<tr>'+headers.map(h=>`<td>${esc(r[h]===null||r[h]===undefined?'':String(r[h]))}</td>`).join('')+'</tr>').join('');
- const report=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Elantra N Log Report</title><style>body{font:14px Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:2rem}h1,h2{color:#0e7490}table{border-collapse:collapse;width:100%;margin:1rem 0 2rem;background:white}th,td{border:1px solid #cbd5e1;padding:.5rem;text-align:left;font-size:12px;vertical-align:top;white-space:nowrap}th{background:#e2e8f0}.note{padding:1rem;border:1px solid #f59e0b;background:#fffbeb}.scroll{overflow:auto;max-height:70vh}</style></head><body><h1>Elantra N Log Analyzer Report</h1><p>Generated ${esc(new Date().toLocaleString())} · Source: ${esc(currentFile)}</p><h2>Summary</h2><table>${statHtml}</table><h2>Channel mapping</h2><table><thead><tr><th>Signal</th><th>Column</th><th>Confidence</th><th>Notes</th></tr></thead><tbody>${mapHtml}</tbody></table><h2>Pull summary</h2><table><thead><tr>${pt.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${pt.body.map(r=>'<tr>'+r.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>').join('')}</tbody></table><h2>Knock Data</h2><table><thead><tr><th>Cylinder</th><th>Column</th><th>Min</th><th>Max</th></tr></thead><tbody>${knockHtml}</tbody></table><div class="scroll"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${dataHtml}</tbody></table></div></body></html>`;
- const blob=new Blob([report],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ElantraN_Report_${Date.now()}.html`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ const report=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Elantra N Log Report</title><style>body{font:14px Arial,sans-serif;background:#050103;color:#f1f5f9;margin:2rem}h1,h2{color:#e11d48}table{border-collapse:collapse;width:100%;margin:1rem 0 2rem;background:#14050a}th,td{border:1px solid #3b0716;padding:.5rem;text-align:left;font-size:12px;vertical-align:top;white-space:nowrap}th{background:#2b0611;color:#fda4af}.note{padding:1rem;border:1px solid #881337;background:#2b0611}.scroll{overflow:auto;max-height:70vh}</style></head><body><h1>Elantra N Log Analyzer Report</h1><p>Generated ${esc(new Date().toLocaleString())} · Source: ${esc(currentFile)}</p><h2>Summary</h2><table>${statHtml}</table><h2>Channel mapping</h2><table><thead><tr><th>Signal</th><th>Column</th><th>Confidence</th><th>Notes</th></tr></thead><tbody>${mapHtml}</tbody></table><h2>Pull summary</h2><table><thead><tr>${pt.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${pt.body.map(r=>'<tr>'+r.map(v=>`<td>${esc(v)}</td>`).join('')+'</tr>').join('')}</tbody></table><h2>Knock Data</h2><table><thead><tr><th>Cylinder</th><th>Column</th><th>Min</th><th>Max</th></tr></thead><tbody>${knockHtml}</tbody></table><div class="scroll"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${dataHtml}</tbody></table></div></body></html>`;
+ const blob=new Blob([report],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ElantraN_Cherry_Report_${Date.now()}.html`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function applyPreset(keys){
@@ -2500,12 +2492,12 @@ if($('scorecard-tile')) $('scorecard-tile').onclick = () => {
   
   const baseItem = document.createElement('div');
   baseItem.className = 'flex justify-between items-center text-slate-300 font-medium py-1';
-  baseItem.innerHTML = `<span>Baseline Healthy ${sc.type} Run</span><span class="text-emerald-400 font-mono">100 pts</span>`;
+  baseItem.innerHTML = `<span>Baseline Healthy ${sc.type} Run</span><span class="text-rose-400 font-mono">100 pts</span>`;
   listEl.append(baseItem);
 
   if(!sc.penalties.length){
     const cleanItem = document.createElement('div');
-    cleanItem.className = 'p-3 bg-emerald-950/40 border border-emerald-500/30 rounded text-emerald-300 text-xs mt-2';
+    cleanItem.className = 'p-3 bg-rose-950/40 border border-rose-800/40 rounded text-rose-300 text-xs mt-2';
     cleanItem.textContent = sc.type === 'WOT' 
       ? 'Zero penalties incurred. Ignition ramp, fuel delivery, boost tracking, and HPFP/LPFP feed hold within platform safety thresholds.'
       : 'Zero penalties incurred. Closed-loop fuel trims, thermostat regulation, oil temperature, and cam modulation hold within healthy daily cruising parameters.';
@@ -2521,7 +2513,7 @@ if($('scorecard-tile')) $('scorecard-tile').onclick = () => {
 
   setTxt('modal-audit-title', `${sc.type === 'WOT' ? 'WOT Performance' : 'Daily Commute'} Health Audit Breakdown`);
   setTxt('modal-final-score', `${sc.score !== null ? sc.score : '--'} / 100`);
-  if($('modal-final-score')) $('modal-final-score').className = `text-xl font-black ${sc.score >= 90 ? 'text-emerald-400' : sc.score >= 70 ? 'text-amber-400' : 'text-rose-400'}`;
+  if($('modal-final-score')) $('modal-final-score').className = `text-xl font-black ${sc.score >= 90 ? 'text-rose-400' : sc.score >= 70 ? 'text-amber-400' : 'text-red-500'}`;
   if($('score-modal')) $('score-modal').classList.remove('hidden');
 };
 
