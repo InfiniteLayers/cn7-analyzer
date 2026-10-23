@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Elantra N Theta II Telemetry Analyzer v13.6.4</title>
+<title>Elantra N Theta II Telemetry Analyzer v13.6.5</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
@@ -22,7 +22,6 @@
   .warn{color:#fbbf24;border-color:#78350f;background:#451a0333}
   .bad{color:#fda4af;border-color:#9f1239;background:#88133733}
   .neutral{color:#cbd5e1;border-color:#475569;background:#33415533}
-  .cherry-brand{color:#fda4af;border-color:#be123c;background:#88133733}
   select,input[type=number]{background:#14050a;border:1px solid #4c0519;border-radius:.5rem;padding:.4rem;color:#f1f5f9}
   .tab{padding:.8rem .2rem;border-bottom:2px solid transparent;color:#94a3b8;font-size:.875rem}
   .tab.active{border-color:#e11d48;color:#fda4af}
@@ -55,11 +54,10 @@
    </div>
    <div>
     <div class="flex items-center gap-2 flex-wrap">
-      <h1 class="text-xl font-bold text-white tracking-tight">Elantra N Theta II Analyzer <span class="text-rose-500 font-mono text-sm">v13.6.4</span></h1>
-      <span class="pill cherry-brand font-semibold">Cherry Tuning Suite</span>
+      <h1 class="text-xl font-bold text-white tracking-tight">Elantra N Theta II Analyzer <span class="text-rose-500 font-mono text-sm">v13.6.5</span></h1>
       <span class="pill good">SIM2K-250 Calibrated</span>
     </div>
-    <p class="small text-slate-400">Theta II 2.0 T-GDI · Physical GDI Injection Timing · Cherry Red Theme</p>
+    <p class="small text-slate-400">Theta II 2.0 T-GDI</p>
    </div>
   </div>
   <div class="flex flex-wrap gap-2">
@@ -88,7 +86,7 @@
       </g>
     </svg>
   </div>
-  <h2 class="text-xl font-semibold text-white mb-2">Load a Cherry Tuning Telemetry File</h2>
+  <h2 class="text-xl font-semibold text-white mb-2">Load a Telemetry Datalog</h2>
   <p class="max-w-xl text-sm text-slate-400 mb-5">Analyze EK1 and Cherry SimK250 CSV datalogs with physical injector pulse widths, sub-frame linear Dragy splits, and debounced calibration scoring.</p>
   <div class="flex gap-3">
     <button id="sample-empty" class="rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-white px-4 py-2 text-xs transition">Load Sample WOT</button>
@@ -364,7 +362,7 @@
   </section>
  </section>
  <footer class="small text-center py-4 text-slate-500 flex items-center justify-center gap-2">
-   <span>v13.6.4 · Theta II 2.0 T-GDI · Cherry Tuning / SimK250 Precision Telemetry Engine</span>
+   <span>v13.6.5 · Theta II 2.0 T-GDI · Cherry Tuning / SimK250 Precision Telemetry Engine</span>
  </footer>
 </main>
 <script>
@@ -2656,7 +2654,10 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
    const el = $(id);
    if(el) el.classList.toggle('hidden',id!==b.dataset.tab);
  });
- if(b.dataset.tab==='chart-panel')renderChart();
+ if(b.dataset.tab==='chart-panel'){
+   if(!chart) renderChart();
+   else chart.resize();
+ }
  if(b.dataset.tab==='power-panel')renderEcuPower();
  if(b.dataset.tab==='compressor-panel')renderCompressorMap();
  if(b.dataset.tab==='data-panel')renderPreview();
