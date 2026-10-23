@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Elantra N Theta II Telemetry Analyzer v13.5.0</title>
+<title>Elantra N Theta II Telemetry Analyzer v13.6.3</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
@@ -18,6 +18,7 @@
   .channel:not(.active){background:#0f172a;color:#94a3b8}
   .pill{font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-radius:999px;padding:.2rem .55rem;border:1px solid}
   .good{color:#6ee7b7;border-color:#065f46;background:#064e3b33}.warn{color:#fcd34d;border-color:#92400e;background:#78350f33}.bad{color:#fda4af;border-color:#9f1239;background:#88133733}.neutral{color:#cbd5e1;border-color:#475569;background:#33415533}
+  .cherry-brand{color:#fda4af;border-color:#be123c;background:#88133733}
   select,input[type=number]{background:#0f172a;border:1px solid #334155;border-radius:.5rem;padding:.4rem;color:#e2e8f0}
   .tab{padding:.8rem .2rem;border-bottom:2px solid transparent;color:#94a3b8;font-size:.875rem}
   .tab.active{border-color:#06b6d4;color:#67e8f9}
@@ -25,28 +26,81 @@
   th{color:#94a3b8;font-weight:600;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em}
   .small{font-size:.75rem;color:#94a3b8}
   .highlight-row{background:rgba(6,182,212,0.22) !important; border-left: 3px solid #06b6d4}
+  .logo-glow{filter: drop-shadow(0 0 10px rgba(225, 29, 72, 0.45));}
 </style>
 </head>
 <body class="min-h-screen font-sans">
-<header class="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/95 backdrop-blur px-5 py-4">
+<header class="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/95 backdrop-blur px-5 py-3.5">
  <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-  <div class="flex items-center gap-3"><div class="p-3 rounded-xl bg-cyan-500 text-slate-950"><i data-lucide="activity"></i></div><div>
-   <div class="flex items-center gap-2 flex-wrap"><h1 class="text-xl font-bold text-white">Elantra N Theta II Analyzer v13.5.0</h1><span class="pill good">11/10 Calibration Engine</span></div>
-   <p class="small">SIM2K-250 Calibrations · Measured GDI Duration (ms) · Cam Phaser Dynamics · Cherry Logger Suite</p>
-  </div></div>
+  <div class="flex items-center gap-3.5">
+   <div class="p-2 rounded-xl bg-slate-900 border border-rose-950 flex items-center justify-center logo-glow">
+    <!-- Cherry Tuning Gear-Cherry SVG Logo -->
+    <svg class="w-9 h-9" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cherryGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fb7185"/>
+          <stop offset="100%" stop-color="#e11d48"/>
+        </radialGradient>
+      </defs>
+      <!-- Leaf -->
+      <path d="M26 15 C26 15, 45 4, 62 12 C66 14, 68 18, 64 22 C52 30, 32 26, 26 15 Z" fill="#e11d48" stroke="#be123c" stroke-width="1.5" />
+      <path d="M28 15 C38 17, 50 16, 62 13" stroke="#fda4af" stroke-width="1.2" stroke-linecap="round" />
+      <!-- Stems -->
+      <path d="M57 18 C68 28, 77 42, 69 61" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
+      <path d="M56 19 C48 30, 42 38, 33 46" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
+      <!-- Left Cherry Gear (12 teeth) -->
+      <g transform="translate(30, 52)">
+        <path d="M 0 -18 L 3 -18 L 3.8 -14.8 L 7.5 -16.2 L 9.8 -14 L 7.2 -11.9 L 10.3 -9.2 L 13.5 -10.1 L 15 -7.5 L 12.1 -5.8 L 14.5 -2.7 L 18 -2.4 L 18 1.4 L 14.5 2.1 L 12.8 5.4 L 15.2 7.8 L 13.2 10.5 L 9.9 9.2 L 7.6 12.1 L 9.1 15.2 L 6.5 17.1 L 3.8 14.5 L 0.5 15.6 L 0 19 L -3.5 18.5 L -3.8 15 L -7.2 13.5 L -9.5 15.8 L -12.1 13.5 L -10.2 10.5 L -13.5 8.2 L -16.8 9.1 L -18 6.2 L -14.5 4.1 L -15.2 0.5 L -18.5 -1.2 L -18 -4.5 L -14.5 -4.8 L -13.2 -8.5 L -16.1 -10.5 L -14 -13.5 L -10.5 -12.1 L -7.8 -14.8 L -8.5 -18 L -5 -18.8 L -3.2 -15.6 Z" fill="none" stroke="#e11d48" stroke-width="3.2" stroke-linejoin="round" />
+        <circle cx="0" cy="0" r="10" fill="#020617" stroke="#e11d48" stroke-width="3" />
+      </g>
+      <!-- Right Cherry Gear (12 teeth) -->
+      <g transform="translate(60, 68)">
+        <path d="M 0 -24 L 4 -24 L 5 -19.5 L 10 -21.5 L 13 -18.5 L 9.5 -15.5 L 13.8 -12 L 18 -13.2 L 20 -9.8 L 16.2 -7.5 L 19.5 -3.5 L 24 -3 L 24 1.8 L 19.5 2.8 L 17.2 7.2 L 20.2 10.5 L 17.5 14 L 13.2 12.2 L 10.2 16.2 L 12.2 20.2 L 8.8 22.8 L 5 19.5 L 0.8 20.8 L 0 25.2 L -4.8 24.5 L -5 20 L -9.5 18 L -12.8 21 L -16.2 18 L -13.5 14 L -18 11 L -22.2 12.2 L -24 8.2 L -19.5 5.5 L -20.2 0.8 L -24.8 -1.5 L -24 -6 L -19.5 -6.5 L -17.5 -11.2 L -21.5 -14 L -18.8 -18 L -14 -16.2 L -10.5 -19.8 L -11.5 -24 L -6.8 -25 L -4.2 -20.8 Z" fill="none" stroke="#e11d48" stroke-width="3.8" stroke-linejoin="round" />
+        <circle cx="0" cy="0" r="13.5" fill="#020617" stroke="#e11d48" stroke-width="3.5" />
+      </g>
+    </svg>
+   </div>
+   <div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <h1 class="text-xl font-bold text-white tracking-tight">Elantra N Theta II Analyzer <span class="text-rose-500 font-mono text-sm">v13.6.3</span></h1>
+      <span class="pill cherry-brand font-semibold">Cherry Tuning Powered</span>
+      <span class="pill good">SIM2K-250 Calibrated</span>
+    </div>
+    <p class="small text-slate-400">Theta II 2.0 T-GDI · Measured GDI Duration (ms) · Flywheel Crank / Raw Default · Cherry Logger Suite</p>
+   </div>
+  </div>
   <div class="flex flex-wrap gap-2">
-   <button id="sample-btn" class="rounded-lg bg-slate-800 border border-slate-700 px-4 py-2 text-sm text-cyan-300">Load sample WOT</button>
-   <label class="cursor-pointer rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950">Upload CSV/TXT<input id="file-input" type="file" accept=".csv,.txt" class="hidden"></label>
-   <label class="cursor-pointer rounded-lg bg-slate-800 border border-violet-500 px-4 py-2 text-sm text-violet-300">Compare log<input id="cmp-input" type="file" accept=".csv,.txt" class="hidden"></label>
-   <button id="report-btn" disabled class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-30">Export report</button>
+   <button id="sample-btn" class="rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-cyan-300 hover:bg-slate-700">Load sample WOT</button>
+   <button id="sample-daily-btn" class="rounded-lg bg-slate-800 border border-amber-600/70 px-3 py-2 text-xs text-amber-300 hover:bg-slate-700">Load sample Daily</button>
+   <label class="cursor-pointer rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-slate-950">Upload CSV/TXT<input id="file-input" type="file" accept=".csv,.txt" class="hidden"></label>
+   <label class="cursor-pointer rounded-lg bg-slate-800 border border-violet-500 px-3 py-2 text-xs text-violet-300">Compare log<input id="cmp-input" type="file" accept=".csv,.txt" class="hidden"></label>
+   <button id="report-btn" disabled class="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-slate-950 disabled:opacity-30">Export report</button>
   </div>
  </div>
 </header>
 <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-5">
  <div id="empty" class="panel min-h-96 flex flex-col items-center justify-center text-center p-8">
-  <i data-lucide="file-up" class="w-12 h-12 text-cyan-400 mb-4"></i><h2 class="text-xl font-semibold text-white mb-2">Load a datalog to begin</h2>
-  <p class="max-w-xl text-sm text-slate-400 mb-5">Analyze Cherry Logger CSV datalogs with measured injector pulse widths, sub-frame interpolation, and shift-shock knock gating.</p>
-  <button id="sample-empty" class="rounded-lg bg-cyan-500 px-5 py-2.5 font-semibold text-slate-950">Load sample log</button>
+  <div class="p-4 rounded-2xl bg-rose-950/40 border border-rose-900/60 mb-4 logo-glow">
+    <svg class="w-16 h-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M26 15 C26 15, 45 4, 62 12 C66 14, 68 18, 64 22 C52 30, 32 26, 26 15 Z" fill="#e11d48" stroke="#be123c" stroke-width="1.5" />
+      <path d="M57 18 C68 28, 77 42, 69 61" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
+      <path d="M56 19 C48 30, 42 38, 33 46" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
+      <g transform="translate(30, 52)">
+        <path d="M 0 -18 L 3 -18 L 3.8 -14.8 L 7.5 -16.2 L 9.8 -14 L 7.2 -11.9 L 10.3 -9.2 L 13.5 -10.1 L 15 -7.5 L 12.1 -5.8 L 14.5 -2.7 L 18 -2.4 L 18 1.4 L 14.5 2.1 L 12.8 5.4 L 15.2 7.8 L 13.2 10.5 L 9.9 9.2 L 7.6 12.1 L 9.1 15.2 L 6.5 17.1 L 3.8 14.5 L 0.5 15.6 L 0 19 L -3.5 18.5 L -3.8 15 L -7.2 13.5 L -9.5 15.8 L -12.1 13.5 L -10.2 10.5 L -13.5 8.2 L -16.8 9.1 L -18 6.2 L -14.5 4.1 L -15.2 0.5 L -18.5 -1.2 L -18 -4.5 L -14.5 -4.8 L -13.2 -8.5 L -16.1 -10.5 L -14 -13.5 L -10.5 -12.1 L -7.8 -14.8 L -8.5 -18 L -5 -18.8 L -3.2 -15.6 Z" fill="none" stroke="#e11d48" stroke-width="3.2" stroke-linejoin="round" />
+        <circle cx="0" cy="0" r="10" fill="#020617" stroke="#e11d48" stroke-width="3" />
+      </g>
+      <g transform="translate(60, 68)">
+        <path d="M 0 -24 L 4 -24 L 5 -19.5 L 10 -21.5 L 13 -18.5 L 9.5 -15.5 L 13.8 -12 L 18 -13.2 L 20 -9.8 L 16.2 -7.5 L 19.5 -3.5 L 24 -3 L 24 1.8 L 19.5 2.8 L 17.2 7.2 L 20.2 10.5 L 17.5 14 L 13.2 12.2 L 10.2 16.2 L 12.2 20.2 L 8.8 22.8 L 5 19.5 L 0.8 20.8 L 0 25.2 L -4.8 24.5 L -5 20 L -9.5 18 L -12.8 21 L -16.2 18 L -13.5 14 L -18 11 L -22.2 12.2 L -24 8.2 L -19.5 5.5 L -20.2 0.8 L -24.8 -1.5 L -24 -6 L -19.5 -6.5 L -17.5 -11.2 L -21.5 -14 L -18.8 -18 L -14 -16.2 L -10.5 -19.8 L -11.5 -24 L -6.8 -25 L -4.2 -20.8 Z" fill="none" stroke="#e11d48" stroke-width="3.8" stroke-linejoin="round" />
+        <circle cx="0" cy="0" r="13.5" fill="#020617" stroke="#e11d48" stroke-width="3.5" />
+      </g>
+    </svg>
+  </div>
+  <h2 class="text-xl font-semibold text-white mb-2">Load a Cherry Tuning Telemetry File</h2>
+  <p class="max-w-xl text-sm text-slate-400 mb-5">Analyze EK1 and Cherry SimK250 CSV datalogs with physical injector pulse widths, sub-frame linear Dragy splits, and debounced calibration scoring.</p>
+  <div class="flex gap-3">
+    <button id="sample-empty" class="rounded-lg bg-cyan-500 px-4 py-2 font-semibold text-slate-950 text-xs">Load Sample WOT</button>
+    <button id="sample-daily-empty" class="rounded-lg bg-slate-800 border border-amber-500 px-4 py-2 font-semibold text-amber-300 text-xs">Load Sample Daily</button>
+  </div>
  </div>
  <section id="workspace" class="hidden space-y-5">
   <div class="panel p-4 flex flex-wrap items-center justify-between gap-3">
@@ -75,8 +129,8 @@
      <div id="s-score" class="text-2xl font-black text-cyan-300">--</div>
      <div id="score-sub" class="small truncate">Evaluating telemetry...</div>
    </div>
-   <div class="metric"><div class="small" id="s-hp-title">ECU Peak Power</div><div id="s-ecu-hp" class="text-xl font-bold text-emerald-300">N/A</div><div id="hp-sub" class="small truncate">Flywheel model</div></div>
-   <div class="metric"><div class="small" id="s-tq-title">ECU Peak Torque</div><div id="s-ecu-tq" class="text-xl font-bold text-teal-300">N/A</div><div id="tq-sub" class="small truncate">Flywheel model</div></div>
+   <div class="metric"><div class="small" id="s-hp-title">ECU Crank Power</div><div id="s-ecu-hp" class="text-xl font-bold text-emerald-300">N/A</div><div id="hp-sub" class="small truncate">Flywheel model</div></div>
+   <div class="metric"><div class="small" id="s-tq-title">ECU Crank Torque</div><div id="s-ecu-tq" class="text-xl font-bold text-teal-300">N/A</div><div id="tq-sub" class="small truncate">Flywheel model</div></div>
    <div class="metric"><div class="small" id="s-boost-title">Actual boost peak</div><div id="s-boost" class="text-xl font-bold text-violet-300">N/A</div><div id="s-target" class="small truncate">Target: N/A</div></div>
    <div class="metric"><div class="small" id="s-fuel-title">Rail pressure min</div><div id="s-railmin" class="text-xl font-bold text-rose-300">N/A</div><div class="small truncate" id="s-fuel-sub">Active window</div></div>
    <div class="metric"><div class="small" id="s-feed-title">LPFP Feed Min</div><div id="s-lpfpmin" class="text-xl font-bold text-amber-300">N/A</div><div id="lpfp-sub" class="small truncate">Lift pump PSI</div></div>
@@ -135,17 +189,17 @@
         <h3 class="font-semibold text-white text-base">Virtual Dyno & ECU Power Model</h3>
         <span class="pill good">5,252 RPM Dual-Axis Synchronized</span>
       </div>
-      <p class="small">Symmetrical HP/TQ scaling crossing at 5,252 RPM · SAE J1349 Normalization · Apex Rings</p>
+      <p class="small">Symmetrical HP/TQ scaling crossing at 5,252 RPM · Flywheel & Raw Defaults · Apex Rings</p>
     </div>
     <div class="flex flex-wrap items-center gap-3 text-xs">
       <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Output Mode:</label>
         <select id="dyno-mode" class="text-xs py-1 px-2 border-slate-700">
-          <option value="crank">Flywheel / Crank (ECU Model)</option>
-          <option value="wheel" selected>Wheel Output (WHP / WTQ)</option>
+          <option value="crank" selected>Flywheel / Crank (ECU Model)</option>
+          <option value="wheel">Wheel Output (WHP / WTQ)</option>
         </select>
       </div>
-      <div id="dyno-loss-wrap" class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+      <div id="dyno-loss-wrap" style="opacity: 0.4;" class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Drivetrain Loss:</label>
         <input id="dyno-loss" type="number" value="13.0" min="5" max="25" step="0.5" class="w-16 py-1 px-1.5 text-xs text-center border-slate-700">
         <span class="text-slate-400">%</span>
@@ -153,8 +207,8 @@
       <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
         <label class="text-slate-400 font-medium">Weather Norm:</label>
         <select id="dyno-sae" class="text-xs py-1 px-2 border-slate-700">
-          <option value="sae" selected>SAE J1349 Corrected</option>
-          <option value="raw">Raw / Uncorrected</option>
+          <option value="sae">SAE J1349 Corrected</option>
+          <option value="raw" selected>Raw / Uncorrected</option>
         </select>
       </div>
       <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1.5">
@@ -250,9 +304,9 @@
              <option value="e85">Straight E85</option>
            </select>
          </label>
-         <label class="flex items-center justify-between">Knock Noise Floor (°): <input id="knock-floor" type="number" value="-0.50" min="-2.0" max="-0.1" step="0.05" class="w-16 text-center"></label>
-         <label class="flex items-center justify-between">Max Lean Margin (&Delta;&lambda;): <input id="lambda-margin" type="number" value="0.030" min="0.010" max="0.080" step="0.005" class="w-16 text-center"></label>
-         <label class="flex items-center justify-between">Overboost Trip (PSI): <input id="overboost-threshold" type="number" value="2.2" min="0.5" max="5.0" step="0.1" class="w-16 text-center"></label>
+         <label class="flex items-center justify-between">Knock Noise Floor (°): <input id="knock-floor" type="number" value="-0.75" min="-2.0" max="-0.1" step="0.05" class="w-16 text-center"></label>
+         <label class="flex items-center justify-between">Max Lean Margin (&Delta;&lambda;): <input id="lambda-margin" type="number" value="0.040" min="0.010" max="0.080" step="0.005" class="w-16 text-center"></label>
+         <label class="flex items-center justify-between">Overboost Trip (PSI): <input id="overboost-threshold" type="number" value="2.5" min="0.5" max="5.0" step="0.1" class="w-16 text-center"></label>
        </div>
        <!-- Pull Detection & Drivetrain -->
        <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-lg space-y-2">
@@ -317,7 +371,9 @@
    </div>
   </section>
  </section>
- <footer class="small text-center py-4">v13.5.0 · Theta II 2.0 T-GDI · Precision Calibration Suite</footer>
+ <footer class="small text-center py-4 text-slate-500 flex items-center justify-center gap-2">
+   <span>v13.6.3 · Theta II 2.0 T-GDI · Cherry Tuning / SimK250 Precision Telemetry Engine</span>
+ </footer>
 </main>
 <script>
 'use strict';
@@ -326,12 +382,11 @@ let rows=[], headers=[], activeMetrics=new Set(), chart=null, powerChart=null, c
 let inspectorPage = 0;
 let syncedRowIndex = null;
 let isCursorLocked = false;
-let ambientBaroPsi = 14.50; // Midlands, SC nominal elevation baseline
+let ambientBaroPsi = 14.50;
 let currentScorePenalties = [];
 let currentAuditType = 'WOT';
 const ROWS_PER_PAGE = 150;
 
-// NULL-SAFE DOM HELPERS
 const $=id=>document.getElementById(id);
 const setTxt = (id, txt) => { const el = $(id); if(el) el.textContent = txt; };
 
@@ -465,7 +520,7 @@ function parseText(text,filename){
    ambientBaroPsi = bVals[0] > 50 ? bVals[0] * 0.145038 : bVals[0];
    setTxt('baro-tag', `Baro: ${ambientBaroPsi.toFixed(2)} PSI (Logged)`);
  } else {
-   ambientBaroPsi = 14.50; // Midlands, SC elevation baseline
+   ambientBaroPsi = 14.50;
    setTxt('baro-tag', `Baro: 14.50 PSI (Midlands Default)`);
  }
 
@@ -540,9 +595,9 @@ function lim(){
    railB: g('rail-b', 10),
    railN: Math.round(g('rail-n', 5)),
    lpfpFloor: g('lpfp-floor', 70.0),
-   knockFloor: g('knock-floor', -0.50),
-   lambdaMargin: g('lambda-margin', 0.030),
-   overboostThreshold: g('overboost-threshold', 2.2),
+   knockFloor: g('knock-floor', -0.75),
+   lambdaMargin: g('lambda-margin', 0.040),
+   overboostThreshold: g('overboost-threshold', 2.5),
    wotFloor: g('wot-threshold', 75),
    elsdTolerance: g('elsd-tolerance', 250),
    shiftWindow: g('shift-window', 1.0),
@@ -671,9 +726,6 @@ function extrema(key,data=getWindowRows()){
  const a=nums(data,key);if(!a.length)return null;let mn=a[0],mx=a[0];for(const v of a){if(v<mn)mn=v;if(v>mx)mx=v;}return {min:mn,max:mx,count:a.length};
 }
 
-// -------------------------------------------------------------
-// VERIFIED KNOCK CLASSIFIER (ACOUSTIC VS SHIFT SHOCK / FLUTTER)
-// -------------------------------------------------------------
 function knockChannelMinima(data=getWindowRows()){
  const c=detected.out, labels=['A','B','C','D'], out=[];
  const thKey = c.throttle, gearKey = c.gear, timeKey = c.time;
@@ -689,7 +741,6 @@ function knockChannelMinima(data=getWindowRows()){
    if(kv <= -5.620 && kv >= -5.630 && thKey && numeric(r[thKey]) && r[thKey] < 50) return;
    if(thKey && numeric(r[thKey]) && r[thKey] < cfg.wotFloor) return;
 
-   // 1. Shift-shock rejection window (within 0.25s of gear change)
    let isShiftShock = false;
    if(gearKey && timeKey && numeric(r[timeKey])){
      const curTime = r[timeKey];
@@ -702,7 +753,6 @@ function knockChannelMinima(data=getWindowRows()){
      }
    }
 
-   // 2. Rigorous decay verification (minimum 2 stepped positive frames under sustained throttle)
    let isRealAcoustic = false;
    if(kv <= -0.75 && !isShiftShock){
      let stepRamps = 0;
@@ -735,103 +785,139 @@ function knockChannelMinima(data=getWindowRows()){
  return out;
 }
 
-// -------------------------------------------------------------
-// DUAL-PERSONALITY HEALTH SCORECARD ENGINE (WOT + COMMUTE)
-// -------------------------------------------------------------
 function calculateScorecard(data){
  const c = detected.out;
  const cfg = lim();
  const wotRows = data.filter(r => (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)) && (!c.rpm || r[c.rpm] >= 1800));
  
- // BRANCH A: WOT PERFORMANCE AUDIT
  if(wotRows.length >= 8){
    currentAuditType = 'WOT';
    let score = 100;
    const penalties = [];
 
    const steadyKnock = knockChannelMinima(wotRows);
+   const acousticEvents = steadyKnock.filter(x => x.isRealAcoustic && !x.isShiftShock && x.value <= cfg.knockFloor);
    const worstK = steadyKnock.reduce((m, x) => x.value < m ? x.value : m, 0);
 
-   let worstDeltaLambda = 0;
+   if(acousticEvents.length >= 2 || worstK <= -4.5){
+     score -= 25; 
+     penalties.push(`Multi-cylinder / severe detonation (${fmt(worstK,2)}° peak retard): -25 pts`);
+   } else if(acousticEvents.length === 1 || worstK <= -2.5){
+     score -= 10; 
+     penalties.push(`Single-cylinder acoustic knock event (${fmt(worstK,2)}° peak): -10 pts`);
+   } else if(worstK < cfg.knockFloor && worstK > -2.5){
+     score -= 5;
+     penalties.push(`Minor knock sensor activity / tip-in flutter (${fmt(worstK,2)}°): -5 pts`);
+   }
+
    if(c.lambda && c.boost){
-     const highBoostWot = wotRows.filter(r => numeric(r[c.boost]) && r[c.boost] >= 15 && numeric(r[c.lambda]));
-     if(highBoostWot.length >= 4){
+     const highBoostWot = wotRows.filter(r => numeric(r[c.boost]) && r[c.boost] >= 15 && numeric(r[c.rpm]) && r[c.rpm] >= 3200 && numeric(r[c.lambda]));
+     
+     if(highBoostWot.length >= 8){
        const deltaErrors = highBoostWot.map(r => {
          const target = (c.lambdaTarget && numeric(r[c.lambdaTarget])) ? r[c.lambdaTarget] : 0.80;
          return { delta: r[c.lambda] - target, measured: r[c.lambda], target };
        });
-       worstDeltaLambda = Math.max(...deltaErrors.map(d => d.delta));
 
-       const sustainedDeficit = deltaErrors.filter(d => d.delta > (cfg.lambdaMargin * 1.5));
-       const transientDeficit = deltaErrors.filter(d => d.delta > cfg.lambdaMargin && d.delta <= (cfg.lambdaMargin * 1.5));
+       let sustainedLeanFrames = 0, maxSustainedLean = 0;
+       let maxDelta = 0;
 
-       if(sustainedDeficit.length >= 4){
-         score -= 30; penalties.push(`Fuel delivery deficit (Measured λ +${fmt(worstDeltaLambda,3)} over setpoint): -30 pts`);
-       } else if(transientDeficit.length >= 3){
-         score -= 10; penalties.push(`Minor fueling shortfall (Measured λ +${fmt(worstDeltaLambda,3)} vs setpoint): -10 pts`);
+       deltaErrors.forEach(d => {
+         if(d.delta > maxDelta) maxDelta = d.delta;
+         if(d.delta > cfg.lambdaMargin){
+           sustainedLeanFrames++;
+           maxSustainedLean = Math.max(maxSustainedLean, sustainedLeanFrames);
+         } else {
+           sustainedLeanFrames = 0;
+         }
+       });
+
+       if(maxSustainedLean >= 8 && maxDelta > (cfg.lambdaMargin * 1.5)){
+         score -= 20; 
+         penalties.push(`Sustained lean fueling under boost (Peak λ +${fmt(maxDelta,3)} over target for ${maxSustainedLean} frames): -20 pts`);
+       } else if(maxSustainedLean >= 5){
+         score -= 5; 
+         penalties.push(`Transient fueling lean dip (λ +${fmt(maxDelta,3)} over target): -5 pts`);
        }
      }
    }
 
    if(c.boost && c.target){
-     const pairedBoost = wotRows.filter(r => numeric(r[c.boost]) && numeric(r[c.target]) && r[c.target] > 12);
-     let overCount = 0, underCount = 0;
+     const settledBoostRows = wotRows.slice(Math.min(10, Math.floor(wotRows.length * 0.2)));
+     const pairedBoost = settledBoostRows.filter(r => numeric(r[c.boost]) && numeric(r[c.target]) && r[c.target] > 14);
+     
+     let sustainedOverboost = 0, maxOverboost = 0;
+     let sustainedUnderboost = 0, maxUnderboost = 0;
+
      pairedBoost.forEach(r => {
-       if(r[c.boost] - r[c.target] > cfg.overboostThreshold) overCount++;
-       if(r[c.target] - r[c.boost] > 3.0) underCount++;
+       const err = r[c.boost] - r[c.target];
+       if(err > cfg.overboostThreshold){
+         sustainedOverboost++;
+         maxOverboost = Math.max(maxOverboost, sustainedOverboost);
+       } else {
+         sustainedOverboost = 0;
+       }
+
+       if(err < -3.5){
+         sustainedUnderboost++;
+         maxUnderboost = Math.max(maxUnderboost, sustainedUnderboost);
+       } else {
+         sustainedUnderboost = 0;
+       }
      });
-     if(overCount >= 10){ 
-       score -= 20; penalties.push(`Sustained Overboost (>${cfg.overboostThreshold} PSI past spool): -20 pts`); 
-     } else if(underCount >= 12){ 
-       score -= 10; penalties.push(`Sustained Underboost (>3 PSI): -10 pts`); 
+
+     if(maxOverboost >= 15){ 
+       score -= 10; 
+       penalties.push(`Sustained overboost past spool transition (>${cfg.overboostThreshold} PSI for ${maxOverboost} frames): -10 pts`); 
+     } else if(maxUnderboost >= 18){ 
+       score -= 10; 
+       penalties.push(`Boost under target / slow spool (>3.5 PSI low for ${maxUnderboost} frames): -10 pts`); 
      }
    }
 
-   if(worstK <= -5.0){
-     score -= 35; penalties.push(`Severe detonation retard (${fmt(worstK,2)}° peak): -35 pts`);
-   } else if(worstK <= -2.5){
-     score -= 20; penalties.push(`Moderate knock retard (${fmt(worstK,2)}° peak): -20 pts`);
-   } else if(worstK < cfg.knockFloor){
-     const worstObj = steadyKnock.find(x => x.value === worstK);
-     if(worstObj && worstObj.isRealAcoustic && !worstObj.isShiftShock){
-       score -= 10; penalties.push(`Minor acoustic detonation (${fmt(worstK,2)}° verified step recovery): -10 pts`);
-     }
-   }
-
-   // Measured GDI Injector Window Saturation Check (>280° Crank Angle)
    if(c.injA && c.rpm){
      let maxCrankAngle = 0;
      wotRows.forEach(r => {
        const injMs = r[c.injA];
        const rpm = r[c.rpm];
-       if(numeric(injMs) && numeric(rpm) && rpm > 2000){
+       if(numeric(injMs) && numeric(rpm) && rpm > 2200){
          const cycleMs = 120000 / rpm;
          const ca = (injMs / cycleMs) * 720;
          if(ca > maxCrankAngle) maxCrankAngle = ca;
        }
      });
-     if(maxCrankAngle > 295){
-       score -= 20; penalties.push(`Measured GDI injection window saturated (${fmt(maxCrankAngle,0)}° CA > 295° limit): -20 pts`);
-     } else if(maxCrankAngle > 280){
-       score -= 10; penalties.push(`High GDI injection window duration (${fmt(maxCrankAngle,0)}° CA): -10 pts`);
+     if(maxCrankAngle > 300){
+       score -= 20; 
+       penalties.push(`GDI injection window saturated (${fmt(maxCrankAngle,0)}° CA > 300° limit): -20 pts`);
+     } else if(maxCrankAngle > 285){
+       score -= 10; 
+       penalties.push(`Elevated GDI injection duration (${fmt(maxCrankAngle,0)}° CA): -10 pts`);
      }
    }
 
    if(c.rail && c.railTarget){
-     const pairedWot = wotRows.filter(r => numeric(r[c.rail]) && numeric(r[c.railTarget]) && r[c.railTarget] > 1000);
+     const pairedWot = wotRows.filter(r => numeric(r[c.rail]) && numeric(r[c.railTarget]) && r[c.railTarget] > 1200);
      if(pairedWot.length >= 8){
        let maxConsecutive = 0, curConsecutive = 0;
        let worstDefPct = 0;
+
        pairedWot.forEach(r => {
          const defPct = ((r[c.railTarget] - r[c.rail]) / r[c.railTarget]) * 100;
          if(defPct > worstDefPct) worstDefPct = defPct;
-         if(defPct >= cfg.railB){ curConsecutive++; maxConsecutive = Math.max(maxConsecutive, curConsecutive); }
-         else { curConsecutive = 0; }
+         if(defPct >= cfg.railB){ 
+           curConsecutive++; 
+           maxConsecutive = Math.max(maxConsecutive, curConsecutive); 
+         } else { 
+           curConsecutive = 0; 
+         }
        });
+
        if(maxConsecutive >= cfg.railN){
-         score -= 20; penalties.push(`HPFP rail deficit > ${cfg.railB}% for ${maxConsecutive} frames: -20 pts`);
-       } else if(worstDefPct >= cfg.railA){
-         score -= 5; penalties.push(`Transient HPFP dip (> ${cfg.railA}%): -5 pts`);
+         score -= 15; 
+         penalties.push(`HPFP rail pressure deficit > ${cfg.railB}% for ${maxConsecutive} frames: -15 pts`);
+       } else if(worstDefPct >= cfg.railA && maxConsecutive >= 3){
+         score -= 5; 
+         penalties.push(`Minor HPFP rail pressure dip (${fmt(worstDefPct,1)}% deficit): -5 pts`);
        }
      }
    }
@@ -840,10 +926,12 @@ function calculateScorecard(data){
      const lpfpWot = wotRows.filter(r => numeric(r[c.lpfp]));
      if(lpfpWot.length >= 6){
        const minLpfp = Math.min(...lpfpWot.map(r => r[c.lpfp]));
-       if(minLpfp < (cfg.lpfpFloor - 8)){
-         score -= 20; penalties.push(`Severe in-tank LPFP starvation (< ${fmt(minLpfp,1)} PSI): -20 pts`);
+       if(minLpfp < 58.0){
+         score -= 20; 
+         penalties.push(`Severe LPFP feed starvation (< 58 PSI): -20 pts`);
        } else if(minLpfp < cfg.lpfpFloor){
-         score -= 10; penalties.push(`In-tank LPFP feed pressure dip (< ${fmt(minLpfp,1)} PSI): -10 pts`);
+         score -= 10; 
+         penalties.push(`In-tank LPFP feed pressure dip (${fmt(minLpfp,1)} PSI): -10 pts`);
        }
      }
    }
@@ -853,7 +941,6 @@ function calculateScorecard(data){
    return {score, penalties, type: 'WOT'};
  }
 
- // BRANCH B: DAILY COMMUTE / CLOSED-LOOP HEALTH AUDIT
  currentAuditType = 'CRUISE';
  let score = 100;
  const penalties = [];
@@ -867,7 +954,7 @@ function calculateScorecard(data){
        holdCounter = 30;
      } else {
        if(holdCounter > 0) holdCounter--;
-       else if(numeric(r[c.stft]) && numeric(r[c.ltft]) && th >= 5 && th <= 45) {
+       else if(numeric(r[c.stft]) && numeric(r[c.ltft]) && th >= 6 && th <= 40) {
          steadyCruiseRows.push(r);
        }
      }
@@ -876,10 +963,12 @@ function calculateScorecard(data){
    if(steadyCruiseRows.length > 50){
      const totalTrims = steadyCruiseRows.map(r => (r[c.stft] + r[c.ltft]) - cfg.trimBaseline);
      const meanDrift = totalTrims.reduce((a, b) => a + b, 0) / totalTrims.length;
-     if(Math.abs(meanDrift) > 12){
-       score -= 25; penalties.push(`High average steady cruise fuel trim drift (${fmt(meanDrift,1)}% from baseline): -25 pts`);
-     } else if(Math.abs(meanDrift) > 8){
-       score -= 10; penalties.push(`Moderate average steady cruise fuel trim drift (${fmt(meanDrift,1)}%): -10 pts`);
+     if(Math.abs(meanDrift) > 16){
+       score -= 25; 
+       penalties.push(`Severe steady cruise fuel trim drift (${fmt(meanDrift,1)}%): -25 pts`);
+     } else if(Math.abs(meanDrift) > 10){
+       score -= 10; 
+       penalties.push(`Moderate steady cruise fuel trim drift (${fmt(meanDrift,1)}%): -10 pts`);
      }
    }
  }
@@ -889,23 +978,25 @@ function calculateScorecard(data){
    const warmStartIdx = data.findIndex(r => numeric(r[c.ect]) && r[c.ect] >= 175);
    const maxEct = ectVals.length ? Math.max(...ectVals) : 0;
    
-   if(maxEct > 225){
-     score -= 25; penalties.push(`Coolant temperature overheating (Peak ${fmt(maxEct,0)}°F): -25 pts`);
+   if(maxEct > 228){
+     score -= 25; 
+     penalties.push(`Engine coolant overheating (Peak ${fmt(maxEct,0)}°F): -25 pts`);
    } else if(warmStartIdx >= 0){
      const postWarmRows = data.slice(warmStartIdx);
      const minPostWarmEct = Math.min(...nums(postWarmRows, c.ect));
-     if(minPostWarmEct < 165){
-       score -= 15; penalties.push(`Engine cooled down post-warmup / Stuck open thermostat (${fmt(minPostWarmEct,0)}°F): -15 pts`);
+     if(minPostWarmEct < 162){
+       score -= 15; 
+       penalties.push(`Thermostat regulation drop post-warmup (${fmt(minPostWarmEct,0)}°F): -15 pts`);
      }
    }
  }
 
  const steadyKnock = knockChannelMinima(data);
- const realKnock = steadyKnock.filter(x => x.value <= cfg.knockFloor && !(x.value <= -5.620 && x.value >= -5.630));
+ const realKnock = steadyKnock.filter(x => x.isRealAcoustic && !x.isShiftShock && x.value <= cfg.knockFloor);
  if(realKnock.length > 0){
    const worstK = Math.min(...realKnock.map(x => x.value));
-   score -= 15;
-   penalties.push(`Part-throttle / Tip-in knock retard observed (${fmt(worstK,2)}°): -15 pts`);
+   score -= 10; 
+   penalties.push(`Part-throttle knock retard observed (${fmt(worstK,2)}°): -10 pts`);
  }
 
  score = Math.max(0, Math.min(100, score));
@@ -999,7 +1090,7 @@ function renderStats(){
    setTxt('s-ecu-tq', peakTq ? `${fmt(peakTq * lossFactor, 0)} WTQ` : (sc.type === 'CRUISE' ? 'Cruise View' : 'N/A'));
    setTxt('tq-sub', peakTq ? `${lossPct.toFixed(1)}% drivetrain loss` : 'WOT only');
  } else {
-   setTxt('s-hp-title', 'ECU Flywheel Power');
+   setTxt('s-hp-title', 'ECU Crank Power');
    setTxt('s-tq-title', 'ECU Crank Torque');
    setTxt('s-ecu-hp', peakHp ? `${fmt(peakHp, 0)} HP` : (sc.type === 'CRUISE' ? 'Cruise View' : 'N/A'));
    setTxt('hp-sub', peakHp ? 'Crankshaft model' : 'WOT only');
@@ -1164,9 +1255,6 @@ function applyRollingSmoothing(pts, windowSize){
   return smoothed;
 }
 
-// -------------------------------------------------------------
-// SAE J1349 WEATHER CORRECTION & DYNO SWEEP ENGINE
-// -------------------------------------------------------------
 function extractDynoSweep(targetRows, c, cfg, lossFactor, saeMode){
  const pullRows = targetRows.filter(r => numeric(r[c.rpm]) && (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)));
  if(!pullRows.length) return null;
@@ -1234,7 +1322,7 @@ function renderEcuPower(){
  const isWheelMode = $('dyno-mode')?.value === 'wheel';
  const lossPct = Number($('dyno-loss')?.value) || 13.0;
  const lossFactor = isWheelMode ? (100.0 - lossPct) / 100.0 : 1.0;
- const saeMode = $('dyno-sae')?.value || 'sae';
+ const saeMode = $('dyno-sae')?.value || 'raw';
  const smoothLvl = Number($('dyno-smoothing')?.value) || 0;
  const showFlow = $('dyno-flow-toggle')?.checked;
  const showKnock = $('dyno-knock-toggle')?.checked;
@@ -1455,9 +1543,6 @@ function renderEcuPower(){
  });
 }
 
-// -------------------------------------------------------------
-// COMPRESSOR SCATTER & MEASURED MASS AIRFLOW
-// -------------------------------------------------------------
 function renderCompressorMap(){
  const cv = $('compressor-chart'); if(!cv) return;
  const old = Chart.getChart(cv); if(old) old.destroy();
@@ -1581,9 +1666,6 @@ function addFinding(type,title,message,eventIdx=null){
  }
 }
 
-// -------------------------------------------------------------
-// PULL STATS & LINEARLY INTERPOLATED ACCELERATION SPLITS
-// -------------------------------------------------------------
 function interpolateCrossingTime(d, col, targetVal, timeCol){
   for(let i = 0; i < d.length - 1; i++){
     const v1 = d[i][col], v2 = d[i+1][col];
@@ -1618,7 +1700,6 @@ function pullStats(){
     }
   }
 
-  // Exact Sub-Frame Interpolated Splits (Virtual Dragy)
   let splitRpm = null;
   if(c.rpm && c.time && d.length >= 8){
     const t3k = interpolateCrossingTime(d, c.rpm, 3000, c.time);
@@ -1689,18 +1770,13 @@ function pullTable(){
  return {head,body};
 }
 
-// -------------------------------------------------------------
-// COMPLETE UNIFIED DIAGNOSTIC ENGINE (v13.5.0 CALIBRATION AUDIT)
-// -------------------------------------------------------------
 function renderDiagnostics(){
  const c=detected.out,data=getWindowRows(),sc=scopeInfo(),el=$('findings');if(!el)return;el.innerHTML='';
  const cfg = lim();
 
- // 1. RPM CHANNEL AUDIT
  if(!c.rpm)addFinding('warn','RPM channel not identified','No RPM header mapped. Pull segmentation and RPM-based analysis unavailable.');
  else addFinding('good','RPM channel identified',`Mapped ${c.rpm}; ${nums(data,c.rpm).length} samples in selected scope.`);
 
- // 2. MEASURED DIRECT INJECTOR PULSE WIDTH & WINDOW AUDIT (ms & °CA)
  if(c.injA && c.rpm){
    let maxCrankAngle = 0, worstInjRow = null, maxInjMs = 0;
    sc.rows.forEach(r => {
@@ -1717,15 +1793,14 @@ function renderDiagnostics(){
      }
    });
 
-   if(maxCrankAngle > 295){
-     addFinding('bad', 'GDI Injection Window Saturated', `Direct injector duration reached ${fmt(maxInjMs,2)} ms (${fmt(maxCrankAngle,0)}° CA) at ${fmt(worstInjRow[c.rpm],0)} RPM under peak load. Commanded pulse exceeds safe 295° CA compression window.`, worstInjRow?.__idx);
-   } else if(maxCrankAngle > 275){
+   if(maxCrankAngle > 300){
+     addFinding('bad', 'GDI Injection Window Saturated', `Direct injector duration reached ${fmt(maxInjMs,2)} ms (${fmt(maxCrankAngle,0)}° CA) at ${fmt(worstInjRow[c.rpm],0)} RPM under peak load. Commanded pulse exceeds safe compression window.`, worstInjRow?.__idx);
+   } else if(maxCrankAngle > 285){
      addFinding('warn', 'Elevated Direct Injection Duration', `Peak direct injection reached ${fmt(maxInjMs,2)} ms (${fmt(maxCrankAngle,0)}° CA) at ${fmt(worstInjRow[c.rpm],0)} RPM. Fuel delivery is near upper optimal boundary.`, worstInjRow?.__idx);
    } else {
      addFinding('good', 'Direct Injection Duration Nominal', `Measured injector pulse width held safely within rotation limits (Peak: ${fmt(maxInjMs,2)} ms / ${fmt(maxCrankAngle,0)}° CA).`);
    }
 
-   // MULTI-CYLINDER INJECTOR BALANCE (A vs B vs C vs D)
    if(c.injB && c.injC && c.injD){
      let maxDelta = 0, worstBalRow = null;
      sc.rows.forEach(r => {
@@ -1743,7 +1818,6 @@ function renderDiagnostics(){
    }
  }
 
- // 3. STAGGERED OVERRUN, DFCO & EXHAUST CRACKLE AUDIT
  if(c.throttle && c.timing && c.rpm){
    let aggrCrackleFrames = 0, mildBurbleFrames = 0, dfcoFrames = 0;
    let minTimingOverrun = 0, worstCrackleRow = null;
@@ -1786,7 +1860,6 @@ function renderDiagnostics(){
    }
  }
 
- // 4. VERIFIED KNOCK RETARD CLASSIFIER (ACOUSTIC VS SHIFT SHOCK / FLUTTER)
  const steadyKnock = knockChannelMinima(data);
  if(!steadyKnock.length) addFinding('warn','Knock Channels Unmapped','No knock retard channels identified.');
  else {
@@ -1813,7 +1886,6 @@ function renderDiagnostics(){
    }
  }
 
- // 5. WHEELSPIN & e-LSD TRACTION AUDIT
  if(c.wheelFL && c.wheelFR && c.throttle){
    const drivenRows = sc.rows.filter(r => numeric(r[c.throttle]) && r[c.throttle] >= 75 && numeric(r[c.wheelFL]) && numeric(r[c.wheelFR]) && r[c.wheelFL] > 10);
    if(drivenRows.length >= 8){
@@ -1840,7 +1912,6 @@ function renderDiagnostics(){
    }
  }
 
- // 6. NORMALIZED SIM2K THROTTLE INTERVENTION AUDIT (THROTTLE CUTS)
  if(c.throttle && c.throttlePlate){
    const cuts = sc.rows.filter(r => numeric(r[c.throttle]) && r[c.throttle] >= 85 && numeric(r[c.throttlePlate]) && r[c.throttlePlate] < 75 && (!c.boost || (numeric(r[c.boost]) && r[c.boost] >= 8)));
    if(cuts.length >= 4){
@@ -1851,7 +1922,6 @@ function renderDiagnostics(){
    }
  }
 
- // 7. INVERTED HYUNDAI EWGA CONTROL LOGIC (BOOST LEAK & CREEP)
  if(c.boost && c.target && c.wgdc){
    const wotBoost = sc.rows.filter(r => (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)) && numeric(r[c.boost]) && numeric(r[c.target]) && numeric(r[c.wgdc]) && r[c.target] > 12);
    let leakFrames = 0, creepFrames = 0, worstLeakRow = null, worstCreepRow = null;
@@ -1866,7 +1936,6 @@ function renderDiagnostics(){
    else addFinding('good', 'EWGA Wastegate Control & Sealing', 'Electronic wastegate actuator is tracking commanded setpoint cleanly with proper spool seating and pressure regulation.');
  }
 
- // 8. FUEL TRIM DRIFT AUDIT (Sustained Load - Tip-In / Overrun Filtered)
  if(c.stft && c.ltft){
    const activeRows = [];
    let holdFrames = 0;
@@ -1913,7 +1982,6 @@ function renderDiagnostics(){
    }
  }
 
- // 9. HPFP FUEL RAIL DELIVERY AUDIT
  if(c.rail && c.railTarget){
    const loadRail = sc.rows.filter(r => (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)) && numeric(r[c.rail]) && numeric(r[c.railTarget]) && r[c.railTarget] > 1000);
    if(loadRail.length >= 6){
@@ -1939,14 +2007,13 @@ function renderDiagnostics(){
    }
  }
 
- // 10. IN-TANK LOW-PRESSURE LIFT PUMP (LPFP) AUDIT
  if(c.lpfp){
    const lpfpRows = sc.rows.filter(r => numeric(r[c.lpfp]) && (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= 40)));
    if(lpfpRows.length >= 6){
      const worstLpfpRow = lpfpRows.reduce((min, r) => r[c.lpfp] < min[c.lpfp] ? r : min, lpfpRows[0]);
      const minVal = worstLpfpRow[c.lpfp];
-     if(minVal < (cfg.lpfpFloor - 8)){
-       addFinding('bad', 'Severe In-Tank LPFP Starvation', `In-tank lift pump feed dropped to ${fmt(minVal,1)} PSI (Threshold: ${cfg.lpfpFloor} PSI). Feed starvation risks HPFP cavitation and lean misfire under peak boost.`, worstLpfpRow.__idx);
+     if(minVal < 58.0){
+       addFinding('bad', 'Severe In-Tank LPFP Starvation', `In-tank lift pump feed dropped to ${fmt(minVal,1)} PSI (Threshold: 58.0 PSI). Feed starvation risks HPFP cavitation and lean misfire under peak boost.`, worstLpfpRow.__idx);
      } else if(minVal < cfg.lpfpFloor){
        addFinding('warn', 'Low-Pressure Fuel Pump (LPFP) Dip', `In-tank fuel feed pressure dipped to ${fmt(minVal,1)} PSI (Threshold: ${cfg.lpfpFloor} PSI). Ensure in-tank basket is submerged and fuel filter is clean.`, worstLpfpRow.__idx);
      } else {
@@ -1955,7 +2022,6 @@ function renderDiagnostics(){
    }
  }
 
- // 11. MEASURED VS. COMMANDED AIR/FUEL RATIO (DELTA LAMBDA AUDIT)
  if(c.lambda && c.boost){
    const highBoostRows = sc.rows.filter(r => (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)) && numeric(r[c.boost]) && r[c.boost] >= 14 && numeric(r[c.lambda]));
    if(highBoostRows.length >= 4){
@@ -1967,7 +2033,7 @@ function renderDiagnostics(){
      const sustainedDeficit = deltaErrors.filter(d => d.delta > (cfg.lambdaMargin * 1.5));
      const transientDeficit = deltaErrors.filter(d => d.delta > cfg.lambdaMargin && d.delta <= (cfg.lambdaMargin * 1.5));
 
-     if(sustainedDeficit.length >= 4){
+     if(sustainedDeficit.length >= 6){
        addFinding('bad', 'Fuel Delivery Deficit (Lean vs Setpoint)', `Measured wideband lambda ran significantly leaner than the ECU's commanded fueling table (Peak error: +${fmt(worstDeltaRec.delta,3)} λ @ ${fmt(worstDeltaRec.rpm,0)} RPM, Target: ${fmt(worstDeltaRec.target,3)}, Measured: ${fmt(worstDeltaRec.measured,3)}). Direct injector delivery is lagging airmass.`, worstDeltaRec.idx);
      } else if(transientDeficit.length >= 3){
        addFinding('warn', 'Minor Fueling Shortfall (Transient Lean Dip)', `Measured lambda drifted slightly leaner than commanded target under boost (+${fmt(worstDeltaRec.delta,3)} λ error). Closed-loop trims are compensating.`, worstDeltaRec.idx);
@@ -1977,21 +2043,20 @@ function renderDiagnostics(){
    }
  }
 
- // 12. THERMAL MANAGEMENT & THERMOSTAT REGULATION AUDIT
  if(c.ect){
    const ectVals = nums(data, c.ect);
-   if(ectVals.length > 50){
+   if(ectVals.length > 40){
      const maxEct = Math.max(...ectVals);
      const warmStartIdx = data.findIndex(r => numeric(r[c.ect]) && r[c.ect] >= 175);
      
-     if(maxEct > 225){
+     if(maxEct > 228){
        const hotRow = data.find(r => r[c.ect] === maxEct);
        addFinding('bad', 'Coolant High Temperature Alert', `Coolant peaked at ${fmt(maxEct,1)}°F. Verify radiator airflow, coolant level, and water pump duty.`, hotRow?.__idx);
      } else if(warmStartIdx >= 0){
        const postWarmRows = data.slice(warmStartIdx);
        const minPostWarmEct = Math.min(...nums(postWarmRows, c.ect));
        
-       if(minPostWarmEct < 165){
+       if(minPostWarmEct < 162){
          const coldRow = postWarmRows.find(r => r[c.ect] === minPostWarmEct);
          addFinding('warn', 'Thermostat Regulation Warning', `Coolant dropped down to ${fmt(minPostWarmEct,1)}°F during cruise after engine had already reached operating temperature. Check for stuck-open thermostat.`, coldRow?.__idx);
        } else {
@@ -2003,11 +2068,10 @@ function renderDiagnostics(){
    }
  }
 
- // 13. VVT CAM PHASER ANGLE MODULATION AUDIT
  if(c.camIn && c.camEx){
    const inVals = nums(data, c.camIn);
    const exVals = nums(data, c.camEx);
-   if(inVals.length > 50 && exVals.length > 50){
+   if(inVals.length > 40 && exVals.length > 40){
      const inRange = Math.max(...inVals) - Math.min(...inVals);
      const exRange = Math.max(...exVals) - Math.min(...exVals);
      if(inRange > 25 && exRange > 20){
@@ -2100,7 +2164,7 @@ function renderPreview(){
 
  let activeCols = headers;
  if(colMode === 'mapped'){
-   const keyOrder = ['time','rpm','gear','speed','throttle','throttlePlate','wgdc','boost','target','rail','railTarget','lpfp','lambda','lambdaTarget','timing','knock1','knock2','knock3','knock4','injA','injB','injC','injD','ect','eot','camIn','camEx','steering','elsdDuty','brakePressure','latG','longG','wheelFL','wheelFR','airflow','hp','tq'];
+   const keyOrder = ['time','rpm','gear','speed','throttle','throttlePlate','wgdc','boost','target','rail','railTarget','lpfp','lambda','lambdaTarget','timing','knock1','knock2','knock3','knock4','injA','injB','injC','injD','ect','eot','camIn','camEx','stft','ltft','steering','elsdDuty','brakePressure','latG','longG','wheelFL','wheelFR','airflow','hp','tq'];
    const mappedList = keyOrder.map(k => c[k]).filter(Boolean);
    activeCols = mappedList.length ? mappedList : headers.slice(0, 24);
  }
@@ -2138,7 +2202,7 @@ function renderPreview(){
        }
        if(h === c.injA && c.rpm && numeric(r[c.rpm]) && r[c.rpm] > 2000){
          const ca = (v / (120000 / r[c.rpm])) * 720;
-         if(ca > 280) return `<td class="text-rose-400 bg-rose-950/40 font-bold">${v.toFixed(2)}ms (${ca.toFixed(0)}°)</td>`;
+         if(ca > 285) return `<td class="text-rose-400 bg-rose-950/40 font-bold">${v.toFixed(2)}ms (${ca.toFixed(0)}°)</td>`;
          return `<td class="text-emerald-300">${v.toFixed(2)}ms</td>`;
        }
        if(h === c.timing && v <= -5.0 && c.throttle && numeric(r[c.throttle]) && r[c.throttle] < 3.0){
@@ -2207,7 +2271,7 @@ function exportFilteredCSV(){
 
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-function sample(){
+function sampleWot(){
  const a=[];let rpm=2200,boost=2,timing=5;
  for(let i=0;i<90;i++){
   if(i<65){
@@ -2258,7 +2322,94 @@ function sample(){
     Knock_Retard_Cyl4_deg:i>50?-2.2:0
   });
  }
- parseText(Papa.unparse(a),'synthetic_demo_wot_log.csv');
+ parseText(Papa.unparse(a),'sample_cherry_wot_log.csv');
+}
+
+function sampleDaily(){
+ const a = [];
+ let ect = 125.0;
+ let eot = 140.0;
+ let speed = 0.0;
+ let gear = 1;
+
+ for(let i = 0; i < 130; i++){
+   const t = +(i * 0.25).toFixed(2);
+   
+   if(ect < 192.0) ect += 0.55;
+   else ect = +(192.0 + Math.sin(i * 0.1) * 2.5).toFixed(1);
+   
+   if(eot < 198.0) eot += 0.45;
+   else eot = +(198.0 + Math.cos(i * 0.1) * 2.0).toFixed(1);
+
+   let th = 15.0, rpm = 1800, boost = -8.0, timing = 22.0, stft = 0.5;
+   let inCam = 135.0, exCam = -98.0;
+
+   if(i < 15){
+     th = 12.0; rpm = 950 + i * 40; gear = 1; speed = i * 1.2;
+     stft = +(Math.sin(i) * 1.5).toFixed(1);
+   } else if(i < 40){
+     th = 24.0; rpm = 1800 + (i - 15) * 45; gear = i < 28 ? 2 : 3; speed = 18 + (i - 15) * 1.1;
+     boost = -2.5; timing = 18.5; inCam = 145.0; exCam = -105.0;
+     stft = +(-1.0 + Math.sin(i * 0.4) * 2.0).toFixed(1);
+   } else if(i < 95){
+     gear = 6; speed = +(62.0 + Math.sin(i * 0.2) * 2.0).toFixed(1);
+     rpm = Math.round(speed * 32.5);
+     th = +(16.0 + Math.cos(i * 0.3) * 3.0).toFixed(1);
+     boost = -4.5; timing = 34.0; inCam = 142.0; exCam = -102.0;
+     stft = +(Math.sin(i * 0.5) * 2.5).toFixed(1);
+   } else if(i < 112){
+     th = 0.0; rpm = 3400 - (i - 95) * 110; gear = 4; speed = 55.0 - (i - 95) * 1.8;
+     boost = -11.5;
+     timing = -6.5; 
+     inCam = 118.0; exCam = -92.0;
+     stft = 0.0;
+   } else {
+     th = 0.0; rpm = 1500 - (i - 112) * 35; gear = 4; speed = 25.0 - (i - 112) * 1.2;
+     boost = -12.0; timing = 10.0;
+     inCam = 115.0; exCam = -90.0;
+   }
+
+   const lam = (i >= 112) ? 1.99 : (i >= 95 ? 1.02 : +(0.995 + Math.sin(i * 0.2) * 0.015).toFixed(3));
+   const airmass = Math.round(220 + th * 14);
+
+   a.push({
+     Time_s: t,
+     Engine_RPM: Math.max(800, rpm),
+     Current_Gear: gear,
+     Vehicle_Speed_F1_mph: +Math.max(0, speed).toFixed(1),
+     Boost_Pressure_psi: +boost.toFixed(2),
+     Boost_Setpoint_psi: 0.00,
+     Throttle_Position_pct: +th.toFixed(1),
+     Throttle_Position: +th.toFixed(1),
+     Air_Flow_lb_min: +(airmass * rpm * 0.0000044).toFixed(2),
+     Air_Mass_per_Stroke_mg: airmass,
+     Fuel_Rail_Pressure_psi: Math.round(1850 + th * 12 + Math.random() * 25),
+     Rail_Press_Setpoint_psi: 1900,
+     LPFP_Pressure_psi: +(79.5 + Math.random() * 2.5).toFixed(1),
+     Fuel_Trim_Short_Term_pct: stft,
+     Fuel_Trim_Long_Term_pct: 1.2,
+     Inj_Time_chA: +(0.85 + (th * 0.05)).toFixed(2),
+     Inj_Time_chB: +(0.85 + (th * 0.05)).toFixed(2),
+     Inj_Time_chC: +(0.85 + (th * 0.05)).toFixed(2),
+     Inj_Time_chD: +(0.85 + (th * 0.05)).toFixed(2),
+     WG_Command_pct: 0.0,
+     Engine_Torque_lbft: Math.round(45 + th * 3.2),
+     Power_est_hp: Math.round((Math.round(45 + th * 3.2) * rpm) / 5252),
+     Lambda_Measured: lam,
+     Lambda_Setpoint: 1.000,
+     Ignition_Timing_deg: +timing.toFixed(1),
+     IAT_F: 72.0,
+     Engine_Coolant_Temp_F: +ect.toFixed(1),
+     Engine_Oil_Temp_F: +eot.toFixed(1),
+     Intake_Cam_Position_degCRK: +inCam.toFixed(1),
+     Exhaust_Cam_Position_degCRK: +exCam.toFixed(1),
+     Knock_Retard_Cyl1_deg: 0.0,
+     Knock_Retard_Cyl2_deg: 0.0,
+     Knock_Retard_Cyl3_deg: 0.0,
+     Knock_Retard_Cyl4_deg: 0.0
+   });
+ }
+ parseText(Papa.unparse(a), 'sample_cherry_daily_commute.csv');
 }
 
 function exportReport(){
@@ -2302,8 +2453,10 @@ if($('p-ign')) $('p-ign').onclick = () => applyPreset(['rpm', 'timing', 'knock1'
 if($('p-daily')) $('p-daily').onclick = () => applyPreset(['rpm', 'ect', 'eot', 'camIn', 'camEx', 'stft', 'ltft', 'speed']);
 if($('p-chassis')) $('p-chassis').onclick = () => applyPreset(['speed', 'steering', 'elsdDuty', 'brakePressure', 'latG', 'longG', 'wheelFL', 'wheelFR']);
 
-if($('sample-btn')) $('sample-btn').onclick=sample;
-if($('sample-empty')) $('sample-empty').onclick=sample;
+if($('sample-btn')) $('sample-btn').onclick=sampleWot;
+if($('sample-daily-btn')) $('sample-daily-btn').onclick=sampleDaily;
+if($('sample-empty')) $('sample-empty').onclick=sampleWot;
+if($('sample-daily-empty')) $('sample-daily-empty').onclick=sampleDaily;
 
 if($('cmp-input')) $('cmp-input').addEventListener('change',async e=>{
  const f=e.target.files?.[0];if(!f)return;
@@ -2339,7 +2492,6 @@ if($('report-btn')) $('report-btn').onclick=exportReport;
 if($('reset-chart')) $('reset-chart').onclick=()=>{if(chart&&chart.resetZoom)chart.resetZoom();else renderChart();};
 if($('chan-search')) $('chan-search').oninput=()=>renderChannels();
 
-// SCORECARD MODAL LISTENERS
 if($('scorecard-tile')) $('scorecard-tile').onclick = () => {
   const sc = calculateScorecard(getWindowRows());
   const listEl = $('score-breakdown-list');
@@ -2376,7 +2528,6 @@ if($('scorecard-tile')) $('scorecard-tile').onclick = () => {
 if($('close-score-modal')) $('close-score-modal').onclick = () => $('score-modal')?.classList.add('hidden');
 if($('score-modal')) $('score-modal').onclick = (e) => { if(e.target === $('score-modal')) $('score-modal')?.classList.add('hidden'); };
 
-// PERSISTENCE & LIVE CALIBRATION CONTROLS
 const settingIds = ['rail-a','rail-b','rail-n','lpfp-floor','knock-floor','lambda-margin','overboost-threshold','wot-threshold','elsd-tolerance','shift-window','fuel-profile'];
 
 function loadSavedSettings(){
@@ -2389,6 +2540,16 @@ function loadSavedSettings(){
    if(savedLoss && $('dyno-loss')) $('dyno-loss').value = savedLoss;
    const savedSmooth = localStorage.getItem('elantraSmooth');
    if(savedSmooth && $('dyno-smoothing')) $('dyno-smoothing').value = savedSmooth;
+
+   const savedDynoMode = localStorage.getItem('elantraDynoMode');
+   if(savedDynoMode && $('dyno-mode')) $('dyno-mode').value = savedDynoMode;
+
+   const savedDynoSae = localStorage.getItem('elantraDynoSae');
+   if(savedDynoSae && $('dyno-sae')) $('dyno-sae').value = savedDynoSae;
+
+   if($('dyno-mode') && $('dyno-loss-wrap')){
+     $('dyno-loss-wrap').style.opacity = $('dyno-mode').value === 'wheel' ? '1' : '0.4';
+   }
  }catch(e){}
 }
 loadSavedSettings();
@@ -2422,9 +2583,9 @@ if($('reset-settings-btn')){
     if($('rail-n')) $('rail-n').value = '5';
     if($('lpfp-floor')) $('lpfp-floor').value = '70.0';
     if($('fuel-profile')) $('fuel-profile').value = 'e10';
-    if($('knock-floor')) $('knock-floor').value = '-0.50';
-    if($('lambda-margin')) $('lambda-margin').value = '0.030';
-    if($('overboost-threshold')) $('overboost-threshold').value = '2.2';
+    if($('knock-floor')) $('knock-floor').value = '-0.75';
+    if($('lambda-margin')) $('lambda-margin').value = '0.040';
+    if($('overboost-threshold')) $('overboost-threshold').value = '2.5';
     if($('wot-threshold')) $('wot-threshold').value = '75';
     if($('elsd-tolerance')) $('elsd-tolerance').value = '250';
     if($('shift-window')) $('shift-window').value = '1.0';
@@ -2448,13 +2609,19 @@ if($('shift-link-toggle')){
 
 if($('dyno-mode')){
   $('dyno-mode').onchange = () => {
+    localStorage.setItem('elantraDynoMode', $('dyno-mode').value);
     const isWheel = $('dyno-mode').value === 'wheel';
     if($('dyno-loss-wrap')) $('dyno-loss-wrap').style.opacity = isWheel ? '1' : '0.4';
     renderStats();
     renderEcuPower();
   };
 }
-if($('dyno-sae')) $('dyno-sae').onchange = renderEcuPower;
+if($('dyno-sae')){
+  $('dyno-sae').onchange = () => {
+    localStorage.setItem('elantraDynoSae', $('dyno-sae').value);
+    renderEcuPower();
+  };
+}
 if($('dyno-loss')){
   $('dyno-loss').oninput = () => {
     localStorage.setItem('elantraLoss', $('dyno-loss').value);
@@ -2505,4 +2672,5 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
 
 if(window.lucide)lucide.createIcons();
 </script>
-</body></html>
+</body>
+</html>
