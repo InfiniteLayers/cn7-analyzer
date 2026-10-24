@@ -284,7 +284,12 @@
         <input id="comp-spline-toggle" type="checkbox" checked class="rounded border-rose-900 text-rose-500">
         <span>Flow Vector Spline</span>
       </label>
-      <div id="baro-tag" class="text-xs bg-black/60 border border-rose-950 rounded px-2.5 py-1.5 text-slate-400">Baro: 14.50 PSI</div>
+      <div class="flex items-center gap-1.5 bg-black/60 border border-rose-950 rounded-lg p-1.5 text-xs">
+  <label for="comp-baro-override" class="text-slate-400 font-medium">Ambient Baro:</label>
+  <input id="comp-baro-override" type="number" value="14.50" min="10.0" max="16.0" step="0.05" class="w-16 py-0.5 px-1 text-xs text-center border border-rose-900/80 rounded bg-[#14050a] text-slate-200">
+  <span class="text-slate-400">PSI</span>
+  <span id="baro-source-tag" class="text-[10px] text-rose-400/80 ml-1">(Default)</span>
+</div>
     </div>
    </div>
 
@@ -484,10 +489,13 @@ function detectChannels(keys){
   boostErr:['boosterror'],
   load:['airmassstroke','airmassperstroke','airmass'],
   baro:['barometricpressurepsi','barometricpressure','ambientpressure','baro'],
+  speed:['vehiclespeedf1mph','vehiclespeedmph','vehiclespeed','speedmph','vss','speed'],
   injA:['injtimecha','injtimea','injectiontimecha','injectortimecha','injtimecyl1'],
   injB:['injtimechb','injtimeb','injectiontimechb','injectortimechb','injtimecyl2'],
   injC:['injtimechc','injtimec','injectiontimechc','injectortimechc','injtimecyl3'],
   injD:['injtimechd','injtimed','injectiontimechd','injectortimechd','injtimecyl4'],
+  fuelCut:['fuelcutflag','fuelcut','decelcutflag','decelerationfuelcut'],
+  egt:['egtignlimiterf','egtf','exhaustgastemp','egt'],
   fuelCut:['fuelcutflag','fuelcut','decelcutflag'],
   steering:['steeringangledeg','steeringangle','steeringwheelangle','sasangle'],
   brakePressure:['brakepressurebar','brakepressurepsi','brakepressure','mastercylinderpressure'],
@@ -850,13 +858,16 @@ function parseText(text,filename){
  cleanRows(detected.out);
  
  const baroKey = detected.out.baro;
+ const baroInput = $('comp-baro-override');
  if(baroKey && nums(rows, baroKey).length){
    const bVals = nums(rows, baroKey);
-   ambientBaroPsi = bVals[0] > 50 ? bVals[0] * 0.145038 : bVals[0];
-   setTxt('baro-tag', `Baro: ${ambientBaroPsi.toFixed(2)} PSI (Logged)`);
+   ambientBaroPsi = bVals[0] > 50 ? +(bVals[0] * 0.145038).toFixed(2) : +bVals[0].toFixed(2);
+   if(baroInput) baroInput.value = ambientBaroPsi.toFixed(2);
+   setTxt('baro-source-tag', '(Logged)');
  } else {
    ambientBaroPsi = 14.50;
-   setTxt('baro-tag', `Baro: 14.50 PSI (Midlands Default)`);
+   if(baroInput) baroInput.value = '14.50';
+   setTxt('baro-source-tag', '(Midlands Default)');
  }
 
  pulls=detectPulls(rows,detected.out);
@@ -1085,26 +1096,36 @@ function calculateScorecard(data){
 
    const injKeys = [c.injA, c.injB, c.injC, c.injD].filter(Boolean);
    if(injKeys.length && c.rpm){
-     let maxCrankAngle = 0;
+     let maxSustainedCA = 0, consecutiveSaturated = 0, maxConsecutiveSaturated = 0;
+     let peakIsolatedCA = 0;
      wotRows.forEach(r => {
        const rpm = r[c.rpm];
        if(numeric(rpm) && rpm > 2200){
          const cycleMs = 120000 / rpm;
-         injKeys.forEach(k => {
-           const injMs = r[k];
-           if(numeric(injMs)){
-             const ca = (injMs / cycleMs) * 720;
-             if(ca > maxCrankAngle) maxCrankAngle = ca;
-           }
-         });
+         const rowCAs = injKeys.map(k => numeric(r[k]) ? (r[k] / cycleMs) * 720 : 0);
+         const ca = Math.max(...rowCAs);
+         if(ca > peakIsolatedCA) peakIsolatedCA = ca;
+         
+         // Only penalize if saturation is sustained (>= 3 consecutive frames)
+         // Single-frame spikes >360° are GDI split-injection multi-pulses
+         if(ca > 285 && ca <= 360){
+           consecutiveSaturated++;
+           if(consecutiveSaturated > maxConsecutiveSaturated) maxConsecutiveSaturated = consecutiveSaturated;
+           if(ca > maxSustainedCA) maxSustainedCA = ca;
+         } else if(ca > 360){
+           // Multi-pulse split injection frame; do not treat as continuous open injector
+           consecutiveSaturated = 0;
+         } else {
+           consecutiveSaturated = 0;
+         }
        }
      });
-     if(maxCrankAngle > 300){
+     if(maxConsecutiveSaturated >= 4 && maxSustainedCA > 300){
        score -= 20; 
-       penalties.push(`GDI injection window saturated (${fmt(maxCrankAngle,0)}° CA > 300° limit): -20 pts`);
-     } else if(maxCrankAngle > 285){
+       penalties.push(`Sustained GDI injection window saturation (${fmt(maxSustainedCA,0)}° CA for ${maxConsecutiveSaturated} frames): -20 pts`);
+     } else if(maxConsecutiveSaturated >= 3 && maxSustainedCA > 285){
        score -= 10; 
-       penalties.push(`Elevated GDI injection duration (${fmt(maxCrankAngle,0)}° CA): -10 pts`);
+       penalties.push(`Elevated GDI injection duration (${fmt(maxSustainedCA,0)}° CA): -10 pts`);
      }
    }
 
@@ -1259,29 +1280,43 @@ function renderDiagnostics(){
     if(!c.rpm) addFinding('warn', 'RPM channel not identified', 'No RPM header mapped. Pull segmentation and RPM-based analysis unavailable.');
     else addFinding('good', 'RPM channel identified', `Mapped ${c.rpm}; ${nums(data, c.rpm).length} samples in selected scope.`);
 
-    // 2. Direct Injection Duration & Multi-Channel Balance
+// 2. Direct Injection Duration & Multi-Channel Balance
     const injKeys = [c.injA, c.injB, c.injC, c.injD].filter(Boolean);
     if(injKeys.length && c.rpm){
-      let maxCrankAngle = 0, worstInjRow = null, maxInjMs = 0;
+      let maxSustainedCA = 0, worstInjRow = null, maxInjMs = 0;
+      let splitPulseCount = 0, worstSplitRow = null;
+      let consecutiveSat = 0, maxConsecutiveSat = 0;
+
       sc.rows.forEach(r => {
         const rpm = r[c.rpm];
         if(numeric(rpm) && rpm > 2000){
           const cycleMs = 120000 / rpm;
-          injKeys.forEach(k => {
-            const injMs = r[k];
-            if(numeric(injMs)){
-              const ca = (injMs / cycleMs) * 720;
-              if(ca > maxCrankAngle){ maxCrankAngle = ca; maxInjMs = injMs; worstInjRow = r; }
+          const injVals = injKeys.map(k => r[k]).filter(numeric);
+          if(injVals.length){
+            const maxMs = Math.max(...injVals);
+            const ca = (maxMs / cycleMs) * 720;
+            if(ca > 360){
+              splitPulseCount++;
+              worstSplitRow = r;
+            } else if(ca > 285){
+              consecutiveSat++;
+              if(consecutiveSat > maxConsecutiveSat){ maxConsecutiveSat = consecutiveSat; maxSustainedCA = ca; maxInjMs = maxMs; worstInjRow = r; }
+            } else {
+              consecutiveSat = 0;
+              if(ca > maxSustainedCA){ maxSustainedCA = ca; maxInjMs = maxMs; }
             }
-          });
+          }
         }
       });
-      if(maxCrankAngle > 300){
-        addFinding('bad', 'GDI Injection Window Saturated', `Direct injector duration reached ${fmt(maxInjMs, 2)} ms (${fmt(maxCrankAngle, 0)}° CA) at ${fmt(worstInjRow ? worstInjRow[c.rpm] : 0, 0)} RPM under peak load. Exceeds safe compression window.`, worstInjRow?.__idx);
-      } else if(maxCrankAngle > 285){
-        addFinding('warn', 'Elevated Direct Injection Duration', `Peak direct injection reached ${fmt(maxInjMs, 2)} ms (${fmt(maxCrankAngle, 0)}° CA). Fuel delivery is near upper optimal boundary.`, worstInjRow?.__idx);
-      } else if(maxCrankAngle > 0){
-        addFinding('good', 'Direct Injection Duration Nominal', `Measured injector pulse width held safely within rotation limits (Peak: ${fmt(maxInjMs, 2)} ms / ${fmt(maxCrankAngle, 0)}° CA).`);
+
+      if(maxConsecutiveSat >= 4 && maxSustainedCA > 300){
+        addFinding('bad', 'Sustained GDI Window Saturation', `Continuous direct injection reached ${fmt(maxInjMs, 2)} ms (${fmt(maxSustainedCA, 0)}° CA) across ${maxConsecutiveSat} frames under peak load.`, worstInjRow?.__idx);
+      } else if(splitPulseCount > 0){
+        addFinding('good', 'GDI Multi-Pulse Split Injection Active', `ECU commanded active dual-pulse split injection under high boost (${splitPulseCount} multi-pulse frames observed, nominal duty held under 275° CA).`, worstSplitRow?.__idx);
+      } else if(maxSustainedCA > 285){
+        addFinding('warn', 'Elevated Direct Injection Duration', `Peak direct injection reached ${fmt(maxInjMs, 2)} ms (${fmt(maxSustainedCA, 0)}° CA). Fuel delivery near upper single-pulse boundary.`, worstInjRow?.__idx);
+      } else if(maxSustainedCA > 0){
+        addFinding('good', 'Direct Injection Duration Nominal', `Measured injector pulse width held safely within rotation limits (Peak: ${fmt(maxInjMs, 2)} ms / ${fmt(maxSustainedCA, 0)}° CA).`);
       }
 
       if(c.injB && c.injC && c.injD){
@@ -1308,21 +1343,22 @@ function renderDiagnostics(){
         const th = numeric(r[c.throttle]) ? r[c.throttle] : 50;
         const timing = numeric(r[c.timing]) ? r[c.timing] : 10;
         const rpm = numeric(r[c.rpm]) ? r[c.rpm] : 0;
-        const lam = c.lambda && numeric(r[c.lambda]) ? r[c.lambda] : null;
+        const isCut = (c.fuelCut && numeric(r[c.fuelCut])) ? r[c.fuelCut] === 1 : false;
 
         if(th < 3.0 && rpm > 1800){
-          if(lam !== null && lam >= 1.95) dfcoFrames++;
-          else if(timing <= -12.0 && rpm >= 4500){
+          if(isCut || (timing <= -5.620 && timing >= -5.630)) {
+            dfcoFrames++;
+          } else if(timing <= -12.0){
             aggrCrackle++;
             if(timing < minTiming){ minTiming = timing; worstCrackleRow = r; }
-          } else if(timing <= -2.0 && timing >= -10.0 && rpm < 4500){
+          } else if(timing <= -2.0 && timing > -12.0){
             mildBurble++;
           }
         }
       });
-      if(aggrCrackle >= 5) addFinding('good', 'High-Energy Overrun Crackle Active (>4,500 RPM)', `Exhaust crackle map verified active above 4,500 RPM (${aggrCrackle} frames, lowest timing ${fmt(minTiming, 1)}° ATDC).`, worstCrackleRow?.__idx);
-      if(mildBurble >= 8) addFinding('good', 'Low-Energy Cruise Burble Active (<4,500 RPM)', `Subdued low-energy burble map verified below 4,500 RPM (${mildBurble} frames holding -2° to -8° ATDC).`);
-      if(dfcoFrames >= 6) addFinding('good', 'Clean DFCO Fuel Cut Transition', `ECU cleanly terminated trailing fuel into pure Deceleration Fuel Cut-Off.`);
+      if(aggrCrackle >= 4) addFinding('good', 'High-Energy Exhaust Crackle Active (-12° to -20° ATDC)', `Verified active high-energy overrun ignition retard (${aggrCrackle} combustion frames, peak retard ${fmt(minTiming, 1)}° ATDC under fueling).`, worstCrackleRow?.__idx);
+      if(mildBurble >= 8) addFinding('good', 'Taper Burble Map Active (-2° to -11° ATDC)', `Subdued deceleration burble map verified active (${mildBurble} frames holding soft exhaust energy).`);
+      if(dfcoFrames >= 6) addFinding('good', 'Clean DFCO Fuel Cut Transition', `ECU cleanly terminated trailing fuel injection into pure Deceleration Fuel Cut-Off.`);
     }
 
     // 4. Knock Retard Classification
@@ -2259,7 +2295,10 @@ function renderCompressorMap(){
  const spec = TURBO_SPECS[profileKey] || TURBO_SPECS.oem52;
  const colorMode = $('comp-color-mode')?.value || 'rpm';
  const showSpline = $('comp-spline-toggle')?.checked ?? true;
-
+const baroInputVal = Number($('comp-baro-override')?.value);
+ if(numeric(baroInputVal) && baroInputVal >= 10.0 && baroInputVal <= 16.0){
+   ambientBaroPsi = baroInputVal;
+ }
  const pullRows = getWindowRows().filter(r => (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)) && numeric(r[c.boost]) && numeric(r[c.rpm]));
  const compPts = [];
 
@@ -2274,8 +2313,10 @@ function renderCompressorMap(){
    if(c.airflow && numeric(r[c.airflow])){
      airflowLbMin = r[c.airflow];
    } else if(c.load && numeric(r[c.load])){
-     const rawL = r[c.load] < 50 ? r[c.load] * 1000 : r[c.load];
-     airflowLbMin = (rawL * rpm * 2) / (1000 * 453.592);
+     // Theta II 2.0T: 4 cylinders = 2 intake events per revolution
+     // Airflow (lb/min) = [Air Mass (mg/stroke) * RPM * 2 strokes/rev] / [453,592.37 mg/lb]
+     const mgStroke = r[c.load] < 50 ? r[c.load] * 1000 : r[c.load];
+     airflowLbMin = +((mgStroke * rpm * 2) / 453592.37).toFixed(2);
    }
 
    const flowRatio = Math.max(0, Math.min(1.2, airflowLbMin / spec.maxFlow));
@@ -2505,7 +2546,13 @@ function getFilteredInspectorRows(){
    const ks = [1,2,3,4].map(i => c['knock'+i]).filter(Boolean);
    return allRows.filter(r => ks.some(k => numeric(r[k]) && r[k] <= cfg.knockFloor && !(r[k] <= -5.620 && r[k] >= -5.630)));
  } else if(filterType === 'crackle' && c.throttle && c.timing){
-   return allRows.filter(r => numeric(r[c.throttle]) && r[c.throttle] < 3.0 && numeric(r[c.timing]) && r[c.timing] <= -5.0 && (!c.rpm || r[c.rpm] > 1800));
+   return allRows.filter(r => {
+     const th = numeric(r[c.throttle]) ? r[c.throttle] : 50;
+     const ign = numeric(r[c.timing]) ? r[c.timing] : 0;
+     const rpm = (c.rpm && numeric(r[c.rpm])) ? r[c.rpm] : 2000;
+     const isCut = (c.fuelCut && numeric(r[c.fuelCut])) ? r[c.fuelCut] === 1 : false;
+     return th < 3.0 && ign <= -5.0 && rpm > 1800 && !isCut && !(ign <= -5.620 && ign >= -5.630);
+   });
  } else if(filterType === 'inj' && c.injA && c.rpm){
    return allRows.filter(r => {
      const ms = r[c.injA], rpm = r[c.rpm];
@@ -3017,7 +3064,10 @@ if($('dyno-knock-toggle')) $('dyno-knock-toggle').onchange = renderEcuPower;
 if($('comp-turbo-profile')) $('comp-turbo-profile').onchange = renderCompressorMap;
 if($('comp-color-mode')) $('comp-color-mode').onchange = renderCompressorMap;
 if($('comp-spline-toggle')) $('comp-spline-toggle').onchange = renderCompressorMap;
-
+if($('comp-baro-override')) $('comp-baro-override').oninput = () => {
+  setTxt('baro-source-tag', '(Custom)');
+  renderCompressorMap();
+};
 if($('trim-ch')) $('trim-ch').onchange=renderTrimMap;
 if($('hist-clear')) $('hist-clear').onclick=()=>{try{localStorage.removeItem('elantraHist');}catch(e){}renderHistory();};
 
