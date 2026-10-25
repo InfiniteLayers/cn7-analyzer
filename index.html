@@ -11,25 +11,310 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
-  body{background:#050103;color:#f1f5f9}
-  .panel{background:rgba(20,5,10,.82);border:1px solid #3b0716;border-radius:1rem}
-  .metric{background:rgba(20,5,10,.72);border:1px solid #3b0716;border-radius:1rem;padding:1rem}
-  .channel{display:flex;align-items:center;justify-content:space-between;gap:.5rem;width:100%;padding:.5rem .65rem;border:1px solid #3b0716;border-radius:.6rem;text-align:left;font:11.5px ui-monospace,monospace}
-  .channel.active{border-color:#e11d48;background:#4c0519;color:#ffe4e6}
-  .channel:not(.active){background:#14050a;color:#94a3b8}
-  .pill{font-size:10px;text-transform:uppercase;letter-spacing:.08em;border-radius:999px;padding:.2rem .55rem;border:1px solid}
-  .good{color:#4ade80;border-color:#14532d;background:#052e1633}
-  .warn{color:#fbbf24;border-color:#78350f;background:#451a0333}
-  .bad{color:#fda4af;border-color:#9f1239;background:#88133733}
-  .neutral{color:#cbd5e1;border-color:#475569;background:#33415533}
-  select,input[type=number]{background:#14050a;border:1px solid #4c0519;border-radius:.5rem;padding:.4rem;color:#f1f5f9}
-  .tab{padding:.8rem .2rem;border-bottom:2px solid transparent;color:#94a3b8;font-size:.875rem}
-  .tab.active{border-color:#e11d48;color:#fda4af}
-  th,td{padding:.65rem .75rem;border-bottom:1px solid #2b0611;text-align:left;font-size:.8rem;white-space:nowrap}
-  th{color:#94a3b8;font-weight:600;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em}
-  .small{font-size:.75rem;color:#94a3b8}
-  .highlight-row{background:rgba(225,29,72,0.22) !important; border-left: 3px solid #e11d48}
-  .logo-glow{filter: drop-shadow(0 0 10px rgba(225, 29, 72, 0.45));}
+  body {
+    background: radial-gradient(circle at 50% 0%, #150308 0%, #060103 60%, #030002 100%);
+    color: #f1f5f9;
+  }
+  .panel {
+    background: linear-gradient(180deg, rgba(24, 6, 12, 0.75) 0%, rgba(12, 3, 6, 0.85) 100%);
+    border: 1px solid rgba(225, 29, 72, 0.22);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
+  }
+  .metric {
+    background: linear-gradient(145deg, rgba(30, 8, 16, 0.6) 0%, rgba(15, 3, 8, 0.75) 100%);
+    border: 1px solid rgba(225, 29, 72, 0.25);
+    border-radius: 0.85rem;
+    padding: 0.9rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .metric::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(244, 63, 94, 0.4), transparent);
+  }
+.metric:hover {
+    border-color: rgba(244, 63, 94, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -6px rgba(225, 29, 72, 0.35);
+  }
+  .metric-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .metric-val-num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .metric-val-unit {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-left: 0.25rem;
+    font-family: ui-monospace, monospace;
+  }
+  .channel {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    width: 100%; padding: .5rem .65rem; border: 1px solid #3b0716; border-radius: .6rem;
+    text-align: left; font: 11.5px ui-monospace,monospace; transition: all 0.15s ease;
+  }
+  .channel.active {
+    border-color: #f43f5e;
+    background: linear-gradient(90deg, #4c0519 0%, #2b040e 100%);
+    color: #ffe4e6;
+    box-shadow: 0 0 12px rgba(225, 29, 72, 0.25);
+  }
+  .channel:not(.active) { background: #120409; color: #94a3b8; }
+  .channel:not(.active):hover { border-color: #881337; color: #cbd5e1; }
+  /* Channel Drawer & Chip Enhancements */
+  .preset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.5rem;
+    font-size: 0.725rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(225, 29, 72, 0.25);
+    background: rgba(20, 5, 11, 0.7);
+    color: #cbd5e1;
+  }
+  .preset-btn:hover {
+    border-color: #f43f5e;
+    background: rgba(225, 29, 72, 0.18);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(225, 29, 72, 0.2);
+  }
+  .preset-btn.active-preset {
+    border-color: #f43f5e;
+    background: linear-gradient(135deg, rgba(225,29,72,0.3) 0%, rgba(190,18,60,0.4) 100%);
+    color: #ffe4e6;
+  }
+  .channel {
+    position: relative;
+    padding-left: 0.85rem !important;
+  }
+  .channel-indicator {
+    position: absolute;
+    left: 0.3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3.5px;
+    height: 65%;
+    border-radius: 999px;
+    background: transparent;
+    transition: background 0.15s ease;
+  }
+  .channel.active .channel-indicator {
+    box-shadow: 0 0 6px currentColor;
+  }
+  /* Modern custom scrollbar for channel list */
+  #channels::-webkit-scrollbar {
+    width: 5px;
+  }
+  #channels::-webkit-scrollbar-track {
+    background: rgba(10, 2, 5, 0.5);
+    border-radius: 4px;
+  }
+  #channels::-webkit-scrollbar-thumb {
+    background: rgba(225, 29, 72, 0.3);
+    border-radius: 4px;
+  }
+  #channels::-webkit-scrollbar-thumb:hover {
+    background: rgba(225, 29, 72, 0.6);
+  }
+  .pill {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+    border-radius: 999px; padding: .2rem .55rem; border: 1px solid; font-weight: 600;
+  }
+  .good { color: #4ade80; border-color: #14532d; background: #052e1644; }
+  .warn { color: #fbbf24; border-color: #78350f; background: #451a0344; }
+  .bad { color: #fda4af; border-color: #9f1239; background: #88133744; }
+  .neutral { color: #cbd5e1; border-color: #475569; background: #33415533; }
+  select, input[type=number] {
+    background: #120408; border: 1px solid #4c0519; border-radius: .5rem;
+    padding: .4rem; color: #f1f5f9; transition: border-color 0.15s;
+  }
+  select:focus, input[type=number]:focus { outline: none; border-color: #f43f5e; }
+
+  /* Highly Visible Segmented Pill Tabs */
+  .tab-nav-container {
+    background: rgba(14, 3, 7, 0.7);
+    border: 1px solid rgba(225, 29, 72, 0.25);
+    padding: 0.35rem;
+    border-radius: 0.85rem;
+    display: inline-flex;
+    gap: 0.35rem;
+  }
+  .tab {
+    padding: 0.55rem 1.15rem;
+    border-radius: 0.6rem;
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: #94a3b8;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+  .tab:hover:not(.active) {
+    color: #f1f5f9;
+    background: rgba(225, 29, 72, 0.1);
+    border-color: rgba(225, 29, 72, 0.2);
+  }
+  .tab.active {
+    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+    color: #ffffff;
+    border-color: #f43f5e;
+    box-shadow: 0 4px 14px rgba(225, 29, 72, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    font-weight: 700;
+  }
+
+  th, td { padding: .65rem .75rem; border-bottom: 1px solid #28050e; text-align: left; font-size: .8rem; white-space: nowrap; }
+  th { color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: .68rem; letter-spacing: .06em; background: rgba(18, 4, 9, 0.8); }
+  .small { font-size: .75rem; color: #94a3b8; }
+  .highlight-row { background: rgba(225, 29, 72, 0.28) !important; border-left: 4px solid #f43f5e !important; }
+  .logo-glow { filter: drop-shadow(0 0 12px rgba(225, 29, 72, 0.55)); }
+/* Audit Score Modal Radial Gauge & Cards */
+  .gauge-circle-bg {
+    stroke: rgba(225, 29, 72, 0.15);
+    stroke-width: 8;
+    fill: none;
+  }
+  .gauge-circle-progress {
+    stroke-width: 8;
+    stroke-linecap: round;
+    fill: none;
+    transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
+  .audit-cat-card {
+    background: rgba(18, 4, 10, 0.75);
+    border: 1px solid rgba(225, 29, 72, 0.22);
+    border-radius: 0.65rem;
+    padding: 0.75rem 0.85rem;
+    transition: border-color 0.15s ease;
+  }
+  .audit-cat-card:hover {
+    border-color: rgba(244, 63, 94, 0.45);
+  }
+  /* Diagnostic Table & Delta Badges */
+  .diag-table {
+    font-variant-numeric: tabular-nums;
+  }
+  .diag-table tr {
+    transition: background-color 0.12s ease;
+  }
+  .diag-table tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.015);
+  }
+  .diag-table tbody tr:hover {
+    background-color: rgba(225, 29, 72, 0.12) !important;
+  }
+  .delta-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 11px;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    border: 1px solid;
+  }
+  .delta-good {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.12);
+    border-color: rgba(74, 222, 128, 0.35);
+  }
+  .delta-bad {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.15);
+    border-color: rgba(244, 63, 94, 0.4);
+  }
+  .delta-neutral {
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.1);
+    border-color: rgba(148, 163, 184, 0.25);
+  }
+  /* WinOLS-style ECU Fuel Trim Matrix */
+  .trim-matrix-table {
+    border-collapse: separate;
+    border-spacing: 2px;
+  }
+  .trim-matrix-table th {
+    background: rgba(22, 6, 12, 0.95);
+    border: 1px solid rgba(225, 29, 72, 0.2);
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    text-align: center;
+    padding: 0.4rem 0.5rem;
+  }
+  .trim-matrix-cell {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.45rem 0.6rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.15s ease;
+  }
+  .trim-matrix-cell:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+    z-index: 10;
+  }
+  /* Drag & Drop Visual FX */
+  .dropzone-active {
+    border-color: #f43f5e !important;
+    background: rgba(225, 29, 72, 0.08) !important;
+    box-shadow: 0 0 25px rgba(225, 29, 72, 0.35) !important;
+  }
+/* Glassmorphic Chart HUD Tooltip */
+  #chart-hud-tooltip {
+    position: absolute;
+    pointer-events: none;
+    z-index: 40;
+    transition: all 0.08s ease-out;
+    background: rgba(12, 3, 7, 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(225, 29, 72, 0.35);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8), 0 0 15px rgba(225, 29, 72, 0.2);
+    min-width: 220px;
+    max-width: 320px;
+    font-size: 11px;
+  }
+  .hud-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.2rem 0;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Data Inspector Zebra & Tabular Numerics */
+  #preview-body tr {
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.1s ease;
+  }
+  #preview-body tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.015);
+  }
+  #preview-body tr:hover {
+    background-color: rgba(225, 29, 72, 0.16) !important;
+  }
 </style>
 </head>
 <body class="min-h-screen font-sans">
@@ -53,14 +338,15 @@
     </svg>
    </div>
    <div>
-    <div class="flex items-center gap-2 flex-wrap">
+   <div class="flex items-center gap-2 flex-wrap">
       <h1 class="text-xl font-bold text-white tracking-tight">Elantra N Log Analyzer <span class="text-rose-500 font-mono text-sm">v13.7.2</span></h1>
-      <span class="pill good">SIM2K-250 Calibrated</span>
+      <span class="pill good">SIM2K Telemetry Parser</span>
     </div>
     <p class="small text-slate-400">Theta II 2.0 T-GDI </p>
    </div>
   </div>
   <div class="flex flex-wrap gap-2">
+    <button id="selftest-btn" class="rounded-lg bg-cyan-950/60 border border-cyan-800/80 px-3 py-2 text-xs font-semibold text-cyan-300 hover:bg-cyan-900/60 transition">Run ?selftest</button>
    <button id="sample-btn" class="rounded-lg bg-rose-950/60 border border-rose-800/80 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-900/60 transition">Load sample WOT</button>
    <button id="sample-daily-btn" class="rounded-lg bg-amber-950/40 border border-amber-800/60 px-3 py-2 text-xs font-semibold text-amber-300 hover:bg-amber-900/40 transition">Load sample Daily</button>
    <label class="cursor-pointer rounded-lg bg-rose-600 hover:bg-rose-500 transition px-4 py-2 text-xs font-bold text-white shadow-lg shadow-rose-950/50">Upload CSV/TXT<input id="file-input" type="file" accept=".csv,.txt" class="hidden"></label>
@@ -70,8 +356,7 @@
  </div>
 </header>
 <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-5">
- <div id="empty" class="panel min-h-96 flex flex-col items-center justify-center text-center p-8">
-  <div class="p-4 rounded-2xl bg-rose-950/40 border border-rose-900/60 mb-4 logo-glow">
+<div id="empty" class="panel min-h-[420px] flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-rose-900/60 hover:border-rose-500/80 transition-all cursor-pointer group">  <div class="p-4 rounded-2xl bg-rose-950/40 border border-rose-900/60 mb-4 logo-glow group-hover:scale-105 transition-transform">
     <svg class="w-16 h-16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M26 15 C26 15, 45 4, 62 12 C66 14, 68 18, 64 22 C52 30, 32 26, 26 15 Z" fill="#e11d48" stroke="#be123c" stroke-width="1.5" />
       <path d="M57 18 C68 28, 77 42, 69 61" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
@@ -86,105 +371,240 @@
       </g>
     </svg>
   </div>
-  <h2 class="text-xl font-semibold text-white mb-2">Load a Telemetry Datalog</h2>
-  <p class="max-w-xl text-sm text-slate-400 mb-5">Analyze EK1 and Cherry SimK250 CSV datalogs with physical injector pulse widths, sub-frame linear Dragy splits, and debounced calibration scoring.</p>
-  <div class="flex gap-3">
-    <button id="sample-empty" class="rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-white px-4 py-2 text-xs transition">Load Sample WOT</button>
-    <button id="sample-daily-empty" class="rounded-lg bg-rose-950/60 border border-rose-800 px-4 py-2 font-semibold text-rose-300 text-xs hover:bg-rose-900 transition">Load Sample Daily</button>
+  <h2 class="text-xl font-bold text-white mb-1.5 tracking-tight">Drop Datalog Here or Browse</h2>
+  <p class="max-w-md text-xs text-slate-400 mb-5 leading-relaxed">Drag & drop your EK1 Mini/Pro or Cherry SIM2K-250 CSV telemetry file directly into this window.</p>
+  
+  <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
+    <button id="sample-empty" class="rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-white px-4 py-2 text-xs transition shadow-lg shadow-rose-950/60 flex items-center gap-1.5">
+      <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+      <span>Load Sample WOT</span>
+    </button>
+    <button id="sample-daily-empty" class="rounded-lg bg-rose-950/60 border border-rose-800 px-4 py-2 font-semibold text-rose-300 text-xs hover:bg-rose-900 transition flex items-center gap-1.5">
+      <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+      <span>Load Daily Cruise</span>
+    </button>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-center gap-2 pt-4 border-t border-rose-950/60 text-[10px] text-slate-500 font-mono">
+    <span class="px-2 py-0.5 rounded bg-black/60 border border-rose-950">EK1 Mini / Pro CSV</span>
+    <span class="px-2 py-0.5 rounded bg-black/60 border border-rose-950">Cherry SimK250 Beta</span>
+    <span class="px-2 py-0.5 rounded bg-black/60 border border-rose-950">KDMLink CAN Telemetry</span>
   </div>
  </div>
  <section id="workspace" class="hidden space-y-5">
-  <div class="panel p-4 flex flex-wrap items-center justify-between gap-3">
-   <div><div id="filename" class="font-semibold text-white">Log</div><div id="rowinfo" class="small">0 rows</div></div>
-   <div class="flex flex-wrap items-center gap-3">
-     <div id="lock-status" class="hidden text-xs bg-rose-950/80 border border-rose-600/60 text-rose-300 px-2.5 py-1.5 rounded-lg flex items-center gap-2">
-       <span>Locked: Row <b id="lock-row-num">-</b></span>
-       <button id="unlock-btn" class="underline hover:text-white">Unlock</button>
+  <div class="panel p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+   <div class="flex items-center gap-3">
+     <div class="p-2 rounded-lg bg-rose-950/40 border border-rose-900/50">
+       <i data-lucide="file-spreadsheet" class="w-4 h-4 text-rose-400"></i>
      </div>
-     <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none bg-black/60 border border-rose-950 rounded-lg py-1 px-2.5">
+     <div>
+       <div id="filename" class="font-bold text-white text-sm tracking-tight truncate max-w-[280px]">Log</div>
+       <div id="rowinfo" class="text-[11px] text-slate-400 font-mono">0 rows</div>
+     </div>
+   </div>
+   <div class="flex flex-wrap items-center gap-2 text-xs">
+     <div id="lock-status" class="hidden text-xs bg-rose-950/90 border border-rose-600 text-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-2 font-mono">
+       <span>Locked: Row <b id="lock-row-num">-</b></span>
+       <button id="unlock-btn" class="underline hover:text-white font-sans text-[11px]">Unlock</button>
+     </div>
+     <label class="flex items-center gap-1.5 text-slate-300 cursor-pointer select-none bg-black/70 border border-rose-950/80 rounded-lg py-1 px-2.5 hover:border-rose-800/80 transition">
        <input id="shift-link-toggle" type="checkbox" class="rounded border-rose-900 text-rose-500">
-       <span>Link Multi-Gear Pulls</span>
+       <span class="text-[11px]">Link Pulls</span>
      </label>
-     <label class="small">X axis <select id="xaxis" class="ml-2"></select></label>
-     <label class="small">Pull focus <select id="pull-select" class="ml-2"><option value="all">Entire log</option></select></label>
-     <button id="export-pull-btn" class="rounded-lg bg-rose-950/60 border border-rose-800/80 px-3 py-1.5 text-xs text-rose-300 hover:bg-rose-900/60 transition">Export Current View (.csv)</button>
+     <div class="flex items-center gap-1 bg-black/70 border border-rose-950/80 rounded-lg px-2 py-1">
+       <span class="text-[11px] text-slate-400">X:</span>
+       <select id="xaxis" class="text-[11px] py-0.5 px-1 border-0 bg-transparent text-slate-200 focus:outline-none"></select>
+     </div>
+     <div class="flex items-center gap-1 bg-black/70 border border-rose-950/80 rounded-lg px-2 py-1">
+       <span class="text-[11px] text-slate-400">Pull:</span>
+       <select id="pull-select" class="text-[11px] py-0.5 px-1 border-0 bg-transparent text-rose-300 font-medium focus:outline-none"><option value="all">Entire log</option></select>
+     </div>
+     <button id="export-pull-btn" class="rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-800/80 px-2.5 py-1.5 text-[11px] text-rose-300 flex items-center gap-1 transition">
+       <i data-lucide="download" class="w-3.5 h-3.5"></i>
+       <span>Export View</span>
+     </button>
    </div>
   </div>
   <div id="warnings" class="space-y-2"></div>
   <div id="pull-card" class="panel p-4 hidden"></div>
   
-  <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
-   <div class="metric cursor-pointer hover:border-rose-500 transition" id="scorecard-tile" title="Click for detailed point deduction breakdown">
-     <div class="flex items-center justify-between"><div class="small" id="s-score-title">Health Score</div><i data-lucide="info" class="w-3.5 h-3.5 text-rose-400"></i></div>
-     <div id="s-score" class="text-2xl font-black text-rose-400">--</div>
-     <div id="score-sub" class="small truncate">Evaluating telemetry...</div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-3">
+    <!-- Octane Learning Status Tile -->
+   <div class="metric" id="tile-ol">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight">Octane Learning</span>
+       <span id="dot-ol" class="metric-status-dot text-slate-500 bg-slate-500"></span>
+     </div>
+     <div id="s-ol-status" class="text-xl font-black text-slate-300 metric-val-num my-0.5">--</div>
+     <div id="s-ol-sub" class="text-[11px] text-slate-400 truncate">Theta II Boost Target</div>
    </div>
-   <div class="metric"><div class="small" id="s-hp-title">ECU Crank Power</div><div id="s-ecu-hp" class="text-xl font-bold text-rose-300">N/A</div><div id="hp-sub" class="small truncate">Flywheel model</div></div>
-   <div class="metric"><div class="small" id="s-tq-title">ECU Crank Torque</div><div id="s-ecu-tq" class="text-xl font-bold text-pink-300">N/A</div><div id="tq-sub" class="small truncate">Flywheel model</div></div>
-   <div class="metric"><div class="small" id="s-boost-title">Actual boost peak</div><div id="s-boost" class="text-xl font-bold text-rose-200">N/A</div><div id="s-target" class="small truncate">Target: N/A</div></div>
-   <div class="metric"><div class="small" id="s-fuel-title">Rail pressure min</div><div id="s-railmin" class="text-xl font-bold text-red-400">N/A</div><div class="small truncate" id="s-fuel-sub">Active window</div></div>
-   <div class="metric"><div class="small" id="s-feed-title">LPFP Feed Min</div><div id="s-lpfpmin" class="text-xl font-bold text-amber-300">N/A</div><div id="lpfp-sub" class="small truncate">Lift pump PSI</div></div>
-   <div class="metric"><div class="small" id="s-temp-title">ECT / EOT Warmup</div><div id="s-iat" class="text-xl font-bold text-rose-300">N/A</div><div id="iat-delta-sub" class="small truncate">Thermostat track</div></div>
-   <div class="metric"><div class="small" id="s-knock-title">Knock extrema</div><div id="s-knock" class="text-lg font-bold text-red-400">N/A</div><div id="k-sub" class="small truncate">Status filtered</div></div>
+   <div class="metric cursor-pointer hover:border-rose-500 transition group" id="scorecard-tile" title="Click for detailed point deduction breakdown">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-score-title">Audit Index</span>
+       <span id="dot-score" class="metric-status-dot text-rose-400 bg-rose-400"></span>
+     </div>
+     <div id="s-score" class="text-2xl font-black text-rose-400 metric-val-num my-0.5">--</div>
+     <div id="score-sub" class="text-[11px] text-slate-400 truncate">Evaluating telemetry...</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-hp-title">ECU Crank Power</span>
+       <span class="metric-status-dot text-rose-500 bg-rose-500"></span>
+     </div>
+     <div id="s-ecu-hp" class="text-xl font-bold text-rose-300 metric-val-num my-0.5">N/A</div>
+     <div id="hp-sub" class="text-[11px] text-slate-400 truncate">Flywheel model</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-tq-title">ECU Crank Torque</span>
+       <span class="metric-status-dot text-pink-500 bg-pink-500"></span>
+     </div>
+     <div id="s-ecu-tq" class="text-xl font-bold text-pink-300 metric-val-num my-0.5">N/A</div>
+     <div id="tq-sub" class="text-[11px] text-slate-400 truncate">Flywheel model</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-boost-title">Boost Peak</span>
+       <span id="dot-boost" class="metric-status-dot text-cyan-400 bg-cyan-400"></span>
+     </div>
+     <div id="s-boost" class="text-xl font-bold text-cyan-200 metric-val-num my-0.5">N/A</div>
+     <div id="s-target" class="text-[11px] text-slate-400 truncate">Target: N/A</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-fuel-title">HPFP Rail Min</span>
+       <span id="dot-rail" class="metric-status-dot text-red-500 bg-red-500"></span>
+     </div>
+     <div id="s-railmin" class="text-xl font-bold text-red-400 metric-val-num my-0.5">N/A</div>
+     <div id="s-fuel-sub" class="text-[11px] text-slate-400 truncate">Active window</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-feed-title">LPFP Feed Min</span>
+       <span id="dot-lpfp" class="metric-status-dot text-amber-400 bg-amber-400"></span>
+     </div>
+     <div id="s-lpfpmin" class="text-xl font-bold text-amber-300 metric-val-num my-0.5">N/A</div>
+     <div id="lpfp-sub" class="text-[11px] text-slate-400 truncate">Lift pump PSI</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-temp-title">ECT / EOT Warmup</span>
+       <span id="dot-temp" class="metric-status-dot text-emerald-400 bg-emerald-400"></span>
+     </div>
+     <div id="s-iat" class="text-xl font-bold text-rose-300 metric-val-num my-0.5">N/A</div>
+     <div id="iat-delta-sub" class="text-[11px] text-slate-400 truncate">Thermostat track</div>
+   </div>
+
+   <div class="metric">
+     <div class="flex items-center justify-between mb-1">
+       <span class="text-[11px] font-bold text-slate-300 tracking-tight" id="s-knock-title">Knock Retard</span>
+       <span id="dot-knock" class="metric-status-dot text-emerald-400 bg-emerald-400"></span>
+     </div>
+     <div id="s-knock" class="text-lg font-bold text-red-400 metric-val-num my-0.5">N/A</div>
+     <div id="k-sub" class="text-[11px] text-slate-400 truncate">Status filtered</div>
+   </div>
   </div>
 
-  <div id="score-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="panel p-6 max-w-md w-full space-y-4 border border-rose-500/40 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-rose-950 pb-3">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2" id="modal-audit-title"><i data-lucide="shield-check" class="text-rose-400"></i> Health Audit Breakdown</h3>
-        <button id="close-score-modal" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
-      </div>
-      <div class="space-y-2 text-sm" id="score-breakdown-list"></div>
-      <div class="pt-3 border-t border-rose-950 flex justify-between items-center font-bold">
-        <span>Evaluated Score:</span>
-        <span id="modal-final-score" class="text-xl text-rose-400">100 / 100</span>
-      </div>
-    </div>
-  </div>
 
-  <nav class="flex gap-6 border-b border-rose-950/80">
-    <button class="tab active" data-tab="chart-panel">Telemetry chart</button>
-    <button class="tab" data-tab="power-panel">Dyno & ECU Power Suite</button>
-    <button class="tab" data-tab="compressor-panel">Compressor Map & Flow</button>
-    <button class="tab" data-tab="diag-panel">Diagnostics & channel map</button>
-    <button class="tab" data-tab="data-panel">Data inspector</button>
-  </nav>
+
+  <div class="overflow-x-auto pb-1">
+    <nav class="tab-nav-container">
+      <button class="tab active" data-tab="chart-panel">
+        <i data-lucide="line-chart" class="w-4 h-4"></i>
+        <span>Telemetry Chart</span>
+      </button>
+      <button class="tab" data-tab="power-panel">
+        <i data-lucide="gauge" class="w-4 h-4"></i>
+        <span>ECU Power Suite</span>
+      </button>
+      <button class="tab" data-tab="compressor-panel">
+        <i data-lucide="wind" class="w-4 h-4"></i>
+        <span>Compressor Map & Flow</span>
+      </button>
+      <button class="tab" data-tab="diag-panel">
+        <i data-lucide="activity" class="w-4 h-4"></i>
+        <span>Diagnostics & Channel Map</span>
+      </button>
+      <button class="tab" data-tab="data-panel">
+        <i data-lucide="table" class="w-4 h-4"></i>
+        <span>Data Inspector</span>
+      </button>
+    </nav>
+  </div>
 
   <!-- TAB 1: TELEMETRY -->
   <section id="chart-panel" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-   <div class="panel p-4 space-y-3">
-     <div class="flex items-center justify-between">
-       <h3 class="font-semibold text-white">Channels</h3>
-       <span class="text-[10px] text-slate-400">1-Click Layouts</span>
+   <div class="panel p-4 space-y-3.5">
+     <div class="flex items-center justify-between border-b border-rose-950/60 pb-2.5">
+       <div class="flex items-center gap-2">
+         <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i>
+         <h3 class="font-bold text-white text-sm tracking-wide">Channels</h3>
+       </div>
+       <span id="active-chan-count" class="pill good font-mono text-[9px]">0 Active</span>
      </div>
-     <div class="grid grid-cols-2 gap-1.5 text-xs">
-       <button id="p-boost" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-rose-300">Spool & Boost</button>
-       <button id="p-fuel" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-red-300">Fueling Safety</button>
-       <button id="p-ign" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-pink-300">Ignition & Knock</button>
-       <button id="p-daily" class="rounded bg-rose-950/40 hover:bg-rose-900/50 border border-amber-800/60 py-1.5 text-amber-300 font-semibold">Daily / Cruise</button>
-       <button id="p-chassis" class="col-span-2 rounded bg-rose-950/40 hover:bg-rose-900/50 border border-rose-900/60 py-1.5 text-rose-200 font-semibold">Chassis & e-LSD (KDMLink)</button>
+
+     <!-- 1-Click Layout Presets -->
+     <div class="space-y-1.5">
+       <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Quick Presets</span>
+       <div class="grid grid-cols-2 gap-1.5">
+         <button id="p-boost" class="preset-btn justify-center text-rose-300">
+           <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+           <span>Spool & Boost</span>
+         </button>
+         <button id="p-fuel" class="preset-btn justify-center text-red-300">
+           <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+           <span>Fuel Safety</span>
+         </button>
+         <button id="p-ign" class="preset-btn justify-center text-amber-300">
+           <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+           <span>Ignition / Knock</span>
+         </button>
+         <button id="p-daily" class="preset-btn justify-center text-emerald-300">
+           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+           <span>Daily Cruise</span>
+         </button>
+         <button id="p-chassis" class="preset-btn col-span-2 justify-center text-cyan-300">
+           <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+           <span>Chassis & e-LSD (KDMLink)</span>
+         </button>
+       </div>
      </div>
-     <input id="chan-search" type="search" placeholder="Search channels" class="w-full rounded-lg border border-rose-950 bg-black/60 px-3 py-2 text-xs text-slate-200">
-     <div id="channels" class="space-y-1.5 max-h-[260px] md:max-h-[460px] overflow-auto"></div>
+
+     <!-- Search Bar -->
+     <div class="relative">
+       <input id="chan-search" type="search" placeholder="Search channels..." class="w-full rounded-lg border border-rose-950/80 bg-black/60 pl-8 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-rose-500 focus:outline-none transition">
+       <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+     </div>
+
+     <!-- Scrollable Channels List -->
+     <div id="channels" class="space-y-1.5 max-h-[260px] md:max-h-[460px] overflow-y-auto pr-1"></div>
    </div>
    <div class="panel p-4 lg:col-span-3">
     <div class="flex flex-wrap justify-between gap-2 mb-3">
       <div><h3 class="font-semibold text-white">Synchronized telemetry</h3><p class="small"><b>Click any point</b> to lock inspection on that row. Drag to pan, scroll to zoom.</p></div>
       <button id="reset-chart" class="text-xs border border-rose-900/80 rounded-lg px-3 py-1.5 text-rose-300 hover:bg-rose-950/40 transition">Reset zoom / view</button>
     </div>
-    <div class="relative h-[340px] md:h-[480px]"><canvas id="chart"></canvas></div>
-   </div>
+<div class="relative h-[340px] md:h-[480px]">
+      <canvas id="chart"></canvas>
+      <div id="chart-hud-tooltip" class="hidden p-3 text-slate-200"></div>
+    </div>   </div>
   </section>
 
-  <!-- TAB 2: PRECISION DYNO & ECU POWER SUITE -->
+  <!-- TAB 2: ECU MODELED POWER SUITE -->
   <section id="power-panel" class="hidden panel p-5 space-y-4">
    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-rose-950 pb-4">
     <div>
       <div class="flex items-center gap-2">
-        <h3 class="font-semibold text-white text-base">Virtual Dyno & ECU Power Model</h3>
-        <span class="pill good">5,252 RPM Dual-Axis Synchronized</span>
+        <h3 class="font-semibold text-white text-base">ECU Modeled Power Suite</h3>
+        <span class="pill good">5,252 RPM Synchronized</span>
       </div>
-      <p class="small">Symmetrical HP/TQ scaling crossing at 5,252 RPM · Flywheel & Raw Defaults · Apex Rings</p>
+      <p class="small" title="Derived from ECU modeled torque channel. Wheel output uses an adjustable friction baseline.">Power & torque reflect ECU internal torque model · Wheel figures apply adjustable mechanical friction baseline</p>
     </div>
     <div class="flex flex-wrap items-center gap-3 text-xs">
       <div class="flex items-center gap-2 bg-black/60 border border-rose-950 rounded-lg p-1.5">
@@ -285,6 +705,11 @@
         <span>Flow Vector Spline</span>
       </label>
       <div class="flex items-center gap-1.5 bg-black/60 border border-rose-950 rounded-lg p-1.5 text-xs">
+        <label for="comp-ic-drop" class="text-slate-400 font-medium" title="Pressure loss across intercooler core and charge piping">Core ΔP:</label>
+        <input id="comp-ic-drop" type="number" value="1.00" min="0.0" max="3.0" step="0.10" class="w-14 py-0.5 px-1 text-xs text-center border border-rose-900/80 rounded bg-[#14050a] text-slate-200">
+        <span class="text-slate-400">PSI</span>
+      </div>
+      <div class="flex items-center gap-1.5 bg-black/60 border border-rose-950 rounded-lg p-1.5 text-xs">
   <label for="comp-baro-override" class="text-slate-400 font-medium">Ambient Baro:</label>
   <input id="comp-baro-override" type="number" value="14.50" min="10.0" max="16.0" step="0.05" class="w-16 py-0.5 px-1 text-xs text-center border border-rose-900/80 rounded bg-[#14050a] text-slate-200">
   <span class="text-slate-400">PSI</span>
@@ -300,7 +725,7 @@
        <div id="comp-pk-pr-sub" class="small text-slate-400">Inlet depression scaled</div>
      </div>
      <div class="metric py-2.5 px-3">
-       <div class="small">Max Compressor Airflow</div>
+       <div class="small">Ingested Airflow Peak</div>
        <div id="comp-pk-flow" class="text-lg font-bold text-pink-400">N/A</div>
        <div id="comp-pk-flow-sub" class="small text-slate-400">Choke limit monitor</div>
      </div>
@@ -349,24 +774,138 @@
              <option value="e85">Straight E85</option>
            </select>
          </label>
+         <label class="flex items-center justify-between">Tune Calibration: 
+           <select id="tune-profile" class="text-xs py-1 px-1.5 border-rose-900/80">
+             <option value="stock" selected>OEM Stock Calibration</option>
+             <option value="stage1">Stage 1 Flash (~20-22 PSI)</option>
+             <option value="stage2">Stage 2 / E30 (~23-25 PSI)</option>
+             <option value="jb4">JB4 Piggyback Map</option>
+           </select>
+         </label>
          <label class="flex items-center justify-between">Knock Noise Floor (°): <input id="knock-floor" type="number" value="-0.75" min="-2.0" max="-0.1" step="0.05" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">Max Lean Margin (&Delta;&lambda;): <input id="lambda-margin" type="number" value="0.040" min="0.010" max="0.080" step="0.005" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">Overboost Trip (PSI): <input id="overboost-threshold" type="number" value="2.5" min="0.5" max="5.0" step="0.1" class="w-16 text-center"></label>
        </div>
        <div class="bg-black/60 border border-rose-950 p-3 rounded-lg space-y-2">
-         <div class="font-bold text-red-400">Traction & Pull Filters</div>
+         <div class="font-bold text-red-400">Traction & Driveline Settings</div>
+         <label class="flex items-center justify-between">Driveline Type:
+           <select id="trans-type" class="text-xs py-1 px-1.5 border-rose-900/80">
+             <option value="mt" selected>6-Speed Manual (0.40s Shift Shock)</option>
+             <option value="dct">8-Speed Wet DCT (0.18s Shift Shock)</option>
+           </select>
+         </label>
          <label class="flex items-center justify-between">WOT Throttle Floor (%): <input id="wot-threshold" type="number" value="75" min="50" max="95" step="1" class="w-16 text-center"></label>
          <label class="flex items-center justify-between">e-LSD Drop Tolerance (RPM): <input id="elsd-tolerance" type="number" value="250" min="50" max="500" step="10" class="w-16 text-center"></label>
-         <label class="flex items-center justify-between">Shift Link Window (sec): <input id="shift-window" type="number" value="1.0" min="0.3" max="2.0" step="0.1" class="w-16 text-center"></label>
-       </div>
+<label class="flex items-center justify-between" title="Max time gap between gears to link a multi-gear pull into one continuous graph">Multi-Gear Link Window (sec): <input id="shift-window" type="number" value="1.0" min="0.3" max="2.0" step="0.1" class="w-16 text-center"></label>       </div>
      </div>
    </div>
 
-   <div class="panel p-5"><div class="flex flex-wrap items-center justify-between gap-2 mb-1"><h3 class="font-semibold text-white">Fuel trim map</h3><select id="trim-ch"><option value="ltft">LTFT</option><option value="stft">STFT</option></select></div><p class="small mb-3">Mean trim (%) binned by engine speed and physical Air Mass / Stroke (mg/stroke) for the active scope. Cells need 5+ samples.</p><div class="overflow-x-auto"><table class="w-full"><tbody id="trim-map"></tbody></table></div></div>
-   <div class="panel p-5"><div class="flex items-center justify-between mb-3"><h3 class="font-semibold text-white">Log history</h3><button id="hist-clear" class="text-xs border border-rose-900 rounded-lg px-3 py-1.5 text-rose-300 hover:bg-rose-950/40 transition">Clear</button></div><p class="small mb-3">Best pull (highest boost) from each log you load, kept on this device.</p><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Log</th><th>Loaded</th><th>Pulls</th><th>Boost pk</th><th>Spool (PSI/s)</th><th>3k–6k (s)</th><th>Lambda min</th><th>Rail def %</th><th>Knock min</th><th>Tq pk</th></tr></thead><tbody id="hist-body"></tbody></table></div></div>
-   <div class="panel p-5"><h3 class="font-semibold text-white mb-1">Log comparison</h3><p id="cmp-note" class="small mb-3"></p><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Metric</th><th>A (current)</th><th>B (compare)</th><th>B - A</th></tr></thead><tbody id="cmp-body"></tbody></table></div></div>
-   <div class="panel p-5"><h3 class="font-semibold text-white mb-1">Pull summary & Verified Acceleration Splits</h3><p class="small mb-3">One row per detected pull with sub-frame interpolated 3k–6k sweep times and intercooler soak delta.</p><div class="overflow-x-auto"><table class="w-full"><thead id="pull-head"></thead><tbody id="pull-body"></tbody></table></div></div>
-   <div class="panel p-5"><h3 class="font-semibold text-white mb-3">Detected channel mapping</h3><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Signal</th><th>Mapped column</th><th>Confidence</th><th>Notes</th></tr></thead><tbody id="mapping"></tbody></table></div></div>
+   <div class="panel p-5 space-y-3">
+     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-rose-950/70 pb-2.5">
+       <div class="flex items-center gap-2">
+         <i data-lucide="grid" class="w-4 h-4 text-rose-400"></i>
+         <h3 class="font-bold text-white text-sm tracking-wide">ECU Fuel Trim Calibration Matrix</h3>
+       </div>
+       <div class="flex items-center gap-2">
+         <span class="text-xs text-slate-400">Signal:</span>
+         <select id="trim-ch" class="text-xs py-1 px-2.5 font-mono">
+           <option value="ltft">LTFT (Long Term Trim)</option>
+           <option value="stft">STFT (Short Term Trim)</option>
+         </select>
+       </div>
+     </div>
+     <p class="text-xs text-slate-400 leading-relaxed">
+       Mean closed-loop trim binned by engine speed and physical Air Mass per Stroke (<span class="font-mono text-rose-300">mg/stroke</span>). Cells require $\ge 5$ discrete samples to compute[cite: 8].
+     </p>
+     <div class="overflow-x-auto py-1">
+       <table class="w-full trim-matrix-table"><tbody id="trim-map"></tbody></table>
+     </div>
+     <!-- Matrix Legend Bar -->
+     <div class="flex items-center justify-between pt-2 border-t border-rose-950/60 text-[10px] text-slate-400 font-mono">
+       <div class="flex items-center gap-2">
+         <span class="px-2 py-0.5 rounded bg-sky-950/60 border border-sky-800/60 text-sky-300">-10% Pulling Fuel (Rich Mixture)</span>
+         <span class="px-2 py-0.5 rounded bg-black/60 border border-slate-800 text-slate-400">0% Stoichiometric Target</span>
+         <span class="px-2 py-0.5 rounded bg-rose-950/60 border border-rose-800/60 text-rose-300">+10% Adding Fuel (Lean Mixture)</span>
+       </div>
+       <span class="text-slate-500">Min 5 samples/cell</span>
+     </div>
+   </div>
+   <!-- Log History Card -->
+   <div class="panel p-5 space-y-2.5">
+     <div class="flex items-center justify-between border-b border-rose-950/70 pb-2">
+       <div class="flex items-center gap-2">
+         <i data-lucide="archive" class="w-4 h-4 text-rose-400"></i>
+         <h3 class="font-bold text-white text-sm">Session History Index</h3>
+       </div>
+       <button id="hist-clear" class="text-xs border border-rose-900/80 hover:border-rose-600 rounded-lg px-2.5 py-1 text-rose-300 transition">Clear History</button>
+     </div>
+     <p class="text-xs text-slate-400">Peak boost sweep recorded from each loaded session, persisted locally.</p>
+     <div class="overflow-x-auto rounded-lg border border-rose-950/70">
+       <table class="w-full diag-table text-xs">
+         <thead>
+           <tr class="bg-black/60">
+             <th>Log Session</th><th>Recorded</th><th>Pulls</th><th>Boost Peak</th><th>Spool (PSI/s)</th><th>3k–6k Split</th><th>Lambda Min</th><th>Rail Def %</th><th>Knock Min</th><th>Torque Peak</th>
+           </tr>
+         </thead>
+         <tbody id="hist-body" class="divide-y divide-rose-950/40"></tbody>
+       </table>
+     </div>
+   </div>
+
+   <!-- Log Comparison Card -->
+   <div class="panel p-5 space-y-2.5">
+     <div class="flex items-center justify-between border-b border-rose-950/70 pb-2">
+       <div class="flex items-center gap-2">
+         <i data-lucide="git-compare" class="w-4 h-4 text-rose-400"></i>
+         <h3 class="font-bold text-white text-sm">Differential Log Comparison</h3>
+       </div>
+       <span id="cmp-status-badge" class="pill neutral text-[9px]">A/B Active</span>
+     </div>
+     <p id="cmp-note" class="text-xs text-slate-400 font-mono"></p>
+     <div class="overflow-x-auto rounded-lg border border-rose-950/70">
+       <table class="w-full diag-table text-xs">
+         <thead>
+           <tr class="bg-black/60">
+             <th>Telemetry Channel</th><th>Base A (Current)</th><th>Delta B (Compare)</th><th>Variance (B - A)</th>
+           </tr>
+         </thead>
+         <tbody id="cmp-body" class="divide-y divide-rose-950/40"></tbody>
+       </table>
+     </div>
+   </div>
+
+   <!-- Pull Summary Card -->
+   <div class="panel p-5 space-y-2.5">
+     <div class="flex items-center gap-2 border-b border-rose-950/70 pb-2">
+       <i data-lucide="timer" class="w-4 h-4 text-rose-400"></i>
+       <h3 class="font-bold text-white text-sm">Pull Summary & Verified Acceleration Splits</h3>
+     </div>
+     <p class="text-xs text-slate-400">Sub-frame interpolated sweep times and intercooler thermal soak accumulation[cite: 8].</p>
+     <div class="overflow-x-auto rounded-lg border border-rose-950/70">
+       <table class="w-full diag-table text-xs">
+         <thead id="pull-head" class="bg-black/60"></thead>
+         <tbody id="pull-body" class="divide-y divide-rose-950/40"></tbody>
+       </table>
+     </div>
+   </div>
+
+   <!-- Channel Mapping Card -->
+   <div class="panel p-5 space-y-2.5">
+     <div class="flex items-center gap-2 border-b border-rose-950/70 pb-2">
+       <i data-lucide="cpu" class="w-4 h-4 text-rose-400"></i>
+       <h3 class="font-bold text-white text-sm">Detected SIM2K Telemetry Channel Map</h3>
+     </div>
+     <div class="overflow-x-auto rounded-lg border border-rose-950/70">
+       <table class="w-full diag-table text-xs">
+         <thead>
+           <tr class="bg-black/60">
+             <th>Physical Signal</th><th>Mapped Column Header</th><th>Heuristic Confidence</th><th>Channel Parsing Notes</th>
+           </tr>
+         </thead>
+         <tbody id="mapping" class="divide-y divide-rose-950/40"></tbody>
+       </table>
+     </div>
+   </div>
   </section>
 
   <!-- TAB 5: DATA INSPECTOR -->
@@ -418,6 +957,65 @@
  <footer class="small text-center py-4 text-slate-500 flex items-center justify-center gap-2">
    <span>v13.7.2 · Theta II 2.0 T-GDI · Precision Telemetry Suite</span>
  </footer>
+  <div id="score-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="panel p-6 max-w-lg w-full space-y-5 border border-rose-500/40 shadow-2xl bg-gradient-to-b from-[#18050c] to-[#0a0205]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-rose-950/80 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="p-1.5 rounded-lg bg-rose-950/60 border border-rose-800/80">
+            <i data-lucide="shield-check" class="w-4 h-4 text-rose-400"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight" id="modal-audit-title">Log Safety Audit Index</h3>
+            <span class="text-[10px] text-slate-400 font-mono">SIM2K-250 Calibrated Deductions</span>
+          </div>
+        </div>
+        <button id="close-score-modal" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-rose-950/50 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Radial Ring & Overview Stats -->
+      <div class="flex items-center justify-around bg-black/50 border border-rose-950/70 p-4 rounded-xl">
+        <div class="relative w-28 h-28 flex items-center justify-center">
+          <svg class="w-full h-full" viewBox="0 0 100 100">
+            <circle class="gauge-circle-bg" cx="50" cy="50" r="40" />
+            <circle id="modal-gauge-ring" class="gauge-circle-progress" cx="50" cy="50" r="40" stroke="#f43f5e" stroke-dasharray="251.32" stroke-dashoffset="0" />
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span id="modal-final-score" class="text-3xl font-black font-mono tracking-tight text-white">100</span>
+            <span class="text-[9px] uppercase tracking-wider font-bold text-slate-400">INDEX</span>
+          </div>
+        </div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex items-center gap-2 text-slate-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Nominal Range: <b>90–100</b></span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>Caution Range: <b>70–89</b></span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-300">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            <span>Review Necessary: <b>&lt; 70</b></span>
+          </div>
+          <div class="pt-1.5 text-[11px] font-mono text-rose-300/80" id="modal-audit-subtitle">Evaluating window telemetry...</div>
+        </div>
+      </div>
+
+      <!-- Categorized Subsystem Deductions -->
+      <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1" id="score-breakdown-list"></div>
+
+      <!-- Modal Footer -->
+      <div class="pt-3 border-t border-rose-950/80 flex justify-between items-center text-xs">
+        <span class="text-slate-400 font-mono">Platform Baseline: 100 Pts</span>
+        <button id="modal-close-btn" class="px-4 py-1.5 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-800/80 text-rose-300 text-xs font-semibold transition">Close Breakdown</button>
+      </div>
+
+    </div>
+  </div>
 </main>
 <script>
 'use strict';
@@ -430,12 +1028,20 @@ let ambientBaroPsi = 14.50;
 let currentScorePenalties = [];
 let currentAuditType = 'WOT';
 const ROWS_PER_PAGE = 150;
-
+// State for Requirements A-G
+let sampleRateHz = 0, sampleJitterMs = 0;
+let heldChannelUpdateRates = {};
+let globalIgnitionRetardCount = 0;
+let cylinderKnockEvents = [];
+let lambdaLeanFlagsCount = 0;
+let lambdaDeepRichCount = 0;
+let unexplainedFuelingTransients = [];
+let lpfpMedianVal = 0, lpfpMaxDrop = 0;
 const $=id=>document.getElementById(id);
 const setTxt = (id, txt) => { const el = $(id); if(el) el.textContent = txt; };
 
-const colors=['#e11d48','#fb7185','#f43f5e','#fda4af','#f97316','#fbbf24','#34d399','#a78bfa','#38bdf8','#c084fc','#f472b6','#e879f9'];
-const norm=s=>String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
+// High-visibility telemetry palette: Crimson, Cyan, Gold, Purple, Green, Orange, Hot Pink, Mint
+const colors = ['#e11d48', '#38bdf8', '#fbbf24', '#a855f7', '#34d399', '#f97316', '#ec4899', '#2dd4bf', '#fb7185', '#60a5fa'];const norm=s=>String(s??'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const numeric=v=>typeof v==='number'&&Number.isFinite(v);
 const fmt=(v,d=1)=>numeric(v)?v.toFixed(d):'N/A';
 const nums=(data,key)=>key?data.map(r=>r[key]).filter(numeric):[];
@@ -457,19 +1063,20 @@ function bestMatch(keys, patterns){
 function detectChannels(keys){
  const specs={
   rpm:['enginespeedrpm','enginerpm','rpm'],
-  boost:['boostactual','actualboost','boostpressure','manifoldabsolutepressure','mapkpa','boostpsi','boost'],
+  boost:['boostactual','actualboost','boostpressure','boostpsi','boost'],
+  map:['manifoldabsolutepressure','mapkpa','mapbar','map_psi','map'],
   target:['boostsetpoint','boosttarget','targetboost','desiredboost','boostdesired','setpointboost'],
-  rail:['fuelrailpressurepsi','hpfpactualpressure','fuelrailpressureactual','actualrailpressure','railpressure','hpfppressure','hpfppsi','hpfp'],
+  rail:['fuelrailpressurepsi','hpfpactualpressure','fuelrailpressureactual','actualrailpressure','railpressure','hpfppressure','hpfppsi','hpfp','fuelrailpressurebar','fuelrailpressurekpa'],
   railTarget:['railpresssetpointpsi','railpresssetpoint','hpfptargetpressure','fuelrailpressuretarget','desiredrailpressure','railpressuretarget','targetrailpressure'],
-  iat:['intakeairtempf','intakeairtemperature','intaketemp','intakeairtemp','iatf','iat'],
-  ect:['enginecoolanttempf','enginecoolanttemp','coolanttempf','coolanttemp','ectf','clttemp'],
-  eot:['engineoiltempf','engineoiltemp','oiltempf','oiltemp','eotf'],
+  iat:['intakeairtempf','intakeairtemperature','intaketemp','intakeairtemp','iatf','iat','intakeairtempc'],
+  ect:['enginecoolanttempf','enginecoolanttemp','coolanttempf','coolanttemp','ectf','clttemp','ectc'],
+  eot:['engineoiltempf','engineoiltemp','oiltempf','oiltemp','eotf','eotc'],
   camIn:['intakecamposition','intakecampos','intakecam','camshaftpositionintake'],
   camEx:['exhaustcamposition','exhaustcampos','exhaustcam','camshaftpositionexhaust'],
-  throttle:['acceleratorposition','acceleratorpedalposition','pedalposition','throttleposition','wot'],
+  throttle:['acceleratorposition','acceleratorpedalposition','pedalposition','throttleposition','wot','pedal'],
   throttlePlate:['throttleplateposition','throttleplate','throttleposition','tps','throttleangle','throttlevalve'],
   gear:['currentgear','gearecu','gear'],
-  speed:['vehiclespeedf1mph','vehiclespeedmph','vehiclespeed','speedmph','vss'],
+  speed:['vehiclespeedf1mph','vehiclespeedmph','vehiclespeed','speedmph','vss','speed','speedkmh'],
   hp:['powerest','powerestimate','poweresthp','ecupower','enginepower','calculatedpower','powerhp','horsepower','whp'],
   tq:['cranktorqueestlbft','cranktorqueest','cranktorque','ecutorque','torqueeffectivelbft','torqueeffective','enginetorque','calculatedtorque','torquelbft','torque'],
   knock1:['knockretardc1','knockc1','knockcyl1','cylinder1knock','knockretardcyl1','knockretard'],
@@ -479,24 +1086,22 @@ function detectChannels(keys){
   time:['times','timesec','timeseconds','time'],
   lambda:['lambdameasured','lambdaactual','lambda'],
   lambdaTarget:['lambdasetpoint','lambdatarget','lambdadesired'],
-  afr:['afrb1','afr'],
-  lpfp:['lpfpmeasuredpsi','lpfpmeasured','lowpressurefuelpump','lpfp'],
-  timing:['ignitiontiming','timingadvance'],
-  stft:['fueltrimshortterm','stft'],
-  ltft:['fueltrimlongterm','ltft'],
-  wgdc:['wgcommand','wastegatecommand','wastegatedutycycle','wastegateduty','boostcontrol','wgdc'],
-  airflow:['airflowlbmin','airflow','massairflowlbmin','massairflow'],
+  afr:['afrb1','afr','airfuelratio'],
+  lpfp:['lpfpmeasuredpsi','lpfpmeasured','lowpressurefuelpump','lpfp','lpfpbar'],
+  timing:['ignitiontiming','timingadvance','timingdeg'],
+  stft:['fueltrimshortterm','stft','shorttermfueltrim'],
+  ltft:['fueltrimlongterm','ltft','longtermfueltrim'],
+  wgdc:['wgcommand','wastegatecommand','wastegatedutycycle','wastegateduty','boostcontrol','wgdc','ewgaduty'],
+  airflow:['airflowlbmin','airflow','massairflowlbmin','massairflow','maf'],
   boostErr:['boosterror'],
   load:['airmassstroke','airmassperstroke','airmass'],
   baro:['barometricpressurepsi','barometricpressure','ambientpressure','baro'],
-  speed:['vehiclespeedf1mph','vehiclespeedmph','vehiclespeed','speedmph','vss','speed'],
   injA:['injtimecha','injtimea','injectiontimecha','injectortimecha','injtimecyl1'],
   injB:['injtimechb','injtimeb','injectiontimechb','injectortimechb','injtimecyl2'],
   injC:['injtimechc','injtimec','injectiontimechc','injectortimechc','injtimecyl3'],
   injD:['injtimechd','injtimed','injectiontimechd','injectortimechd','injtimecyl4'],
   fuelCut:['fuelcutflag','fuelcut','decelcutflag','decelerationfuelcut'],
   egt:['egtignlimiterf','egtf','exhaustgastemp','egt'],
-  fuelCut:['fuelcutflag','fuelcut','decelcutflag'],
   steering:['steeringangledeg','steeringangle','steeringwheelangle','sasangle'],
   brakePressure:['brakepressurebar','brakepressurepsi','brakepressure','mastercylinderpressure'],
   elsdDuty:['elsdlockingduty','elsdduty','elsdclutchpressure','elsdtorque','differentialtorque'],
@@ -509,16 +1114,24 @@ function detectChannels(keys){
  const out={}, info=[];
  for(const [name,aliases] of Object.entries(specs)){
    let m=bestMatch(keys,aliases);
-   if(name==='boost'&&m.key&&/(target|desired|setpoint)/i.test(m.key)){m={key:null,confidence:'Ambiguous',note:'Candidate appears to be a target channel; not treated as actual boost.'};}
-   if(name==='hp'&&m.key&&/(est|estimate|estimated)/i.test(norm(m.key))){m={key:m.key,confidence:'High',note:'Mapped ECU/logger estimated power channel'};}
+   if(name==='boost'&&m.key&&/(target|desired|setpoint)/i.test(m.key)){m={key:null,confidence:'Ambiguous',note:'Target channel excluded from actual boost.'};}
+   if(name==='hp'&&m.key&&/(est|estimate|estimated)/i.test(norm(m.key))){m={key:m.key,confidence:'High',note:'Mapped ECU estimated power channel'};}
    if(name==='wgdc'&&m.key&&/position/i.test(norm(m.key))){m={key:null,confidence:'Ambiguous',note:'Matched position sensor instead of commanded WGDC.'};}
    if(name==='throttlePlate'&&out.throttle===m.key){
      const other = keys.find(k => /(throttleposition|throttleplate|tps)/i.test(norm(k)) && k !== out.throttle);
-     if(other) m={key:other,confidence:'High',note:'Separated Throttle Plate Angle from Pedal Position'};
+     if(other) m={key:other,confidence:'High',note:'Separated Throttle Plate from Pedal Position'};
    }
    out[name]=m.key;
    info.push({signal:name,key:m.key,confidence:m.confidence,note:m.note});
  }
+
+ // Fallback: Derive Boost from MAP if standalone relative boost channel is missing
+ if(!out.boost && out.map){
+   out.boost = out.map;
+   const x = info.find(z => z.signal === 'boost');
+   if(x) { x.key = out.map; x.confidence = 'Medium'; x.note = 'Derived from Manifold Absolute Pressure'; }
+ }
+
  for(let i=1;i<=4;i++){
    if(!out['knock'+i]){
     const candidates=keys.filter(k=>/knock|ignitioncorrection|knockretard/i.test(k)&&new RegExp('(cyl(?:inder)?'+i+'|c'+i+'|_'+i+'$)','i').test(k));
@@ -528,7 +1141,7 @@ function detectChannels(keys){
  if(!out.knock1&&!out.knock2&&!out.knock3&&!out.knock4){
    const base=keys.filter(k=>/^knock\s*retard(\s+[a-d])?$/i.test(k.trim()));
    if(base.length>=2)base.forEach(k=>{const m=k.trim().match(/\s([a-d])$/i),idx='ABCD'.indexOf(m?m[1].toUpperCase():'A')+1,x=info.find(z=>z.signal==='knock'+idx);
-     out['knock'+idx]=k;x.key=k;x.confidence='Medium';x.note='Logger suffix A-D preserved as channel labels; cylinder assignment confirmed';});
+     out['knock'+idx]=k;x.key=k;x.confidence='Medium';x.note='Logger suffix A-D mapped to Cyl 1-4';});
  }
  return {out,info};
 }
@@ -542,6 +1155,9 @@ function sniffDelimiter(text){
 function lim(){
  const g = (id, def) => { const v = Number($(id)?.value); return Number.isFinite(v) ? v : def; };
  const fuel = $('fuel-profile')?.value || 'e10';
+ const trans = $('trans-type')?.value || 'mt';
+ const tune = $('tune-profile')?.value || 'stock';
+ const shiftShockWindow = trans === 'dct' ? 0.18 : 0.40;
  let trimBaseline = 0.0, stoich = 14.08;
  if(fuel === 'e20') { trimBaseline = 3.5; stoich = 13.6; }
  else if(fuel === 'e30') { trimBaseline = 7.0; stoich = 13.0; }
@@ -558,6 +1174,9 @@ function lim(){
    wotFloor: g('wot-threshold', 75),
    elsdTolerance: g('elsd-tolerance', 250),
    shiftWindow: g('shift-window', 1.0),
+   transType: trans,
+   tuneProfile: tune, // <--- ADD THIS
+   shiftShockWindow,
    fuelProfile: fuel,
    trimBaseline,
    stoich
@@ -602,18 +1221,424 @@ function cleanRows(c){
    if(g.length){const m=g.reduce((a,b)=>b.d>a.d?b:a);dataNotes.push(`${g.length} time gap(s) over 1 s (largest ${m.d.toFixed(1)} s after t=${m.t.toFixed(1)}).`);}
  }
 }
+function normalizeTelemetry(c) {
+  if (!rows.length) return;
 
-function detectPulls(data,c){
+  // 1. Detect if Boost is MAP (Absolute) or in Metric Units (kPa / Bar)
+  if (c.boost) {
+    const boostVals = nums(rows, c.boost);
+    if (boostVals.length) {
+      const maxB = Math.max(...boostVals);
+      const minB = Math.min(...boostVals);
+
+      // Case A: MAP in kPa (e.g. 100 kPa idle/ambient to 280+ kPa boost)
+      if (maxB > 75) {
+        rows.forEach(r => {
+          if (numeric(r[c.boost])) r[c.boost] = +((r[c.boost] * 0.145038) - ambientBaroPsi).toFixed(2);
+        });
+        if (c.target && nums(rows, c.target).length && Math.max(...nums(rows, c.target)) > 75) {
+          rows.forEach(r => {
+            if (numeric(r[c.target])) r[c.target] = +((r[c.target] * 0.145038) - ambientBaroPsi).toFixed(2);
+          });
+        }
+        dataNotes.push('Converted Absolute MAP (kPa) to Relative Gauge Boost (PSI).');
+      }
+      // Case B: MAP in Absolute PSI (never negative, min > 2.5 psi, max > 22 psi)
+      else if (minB >= 0.0 && maxB > 22.0) {
+        rows.forEach(r => {
+          if (numeric(r[c.boost])) r[c.boost] = +(r[c.boost] - ambientBaroPsi).toFixed(2);
+        });
+        if (c.target && nums(rows, c.target).length && Math.min(...nums(rows, c.target)) >= 0.0 && Math.max(...nums(rows, c.target)) > 22.0) {
+          rows.forEach(r => {
+            if (numeric(r[c.target])) r[c.target] = +(r[c.target] - ambientBaroPsi).toFixed(2);
+          });
+        }
+        dataNotes.push('Subtracted Barometric Pressure from Absolute MAP to derive Gauge Boost (PSI).');
+      }
+      // Case C: Boost in Bar (e.g. 0.0 to 1.85 bar gauge)
+      else if (maxB <= 3.5 && maxB > 0.4 && minB >= -1.2) {
+        rows.forEach(r => {
+          if (numeric(r[c.boost])) r[c.boost] = +(r[c.boost] * 14.5038).toFixed(2);
+        });
+        if (c.target && nums(rows, c.target).length && Math.max(...nums(rows, c.target)) <= 3.5) {
+          rows.forEach(r => {
+            if (numeric(r[c.target])) r[c.target] = +(r[c.target] * 14.5038).toFixed(2);
+          });
+        }
+        dataNotes.push('Converted Gauge Boost from Bar to PSI.');
+      }
+    }
+  }
+
+  // 2. Normalize HPFP Rail Pressure (if logged in Bar or MPa)
+  if (c.rail) {
+    const railVals = nums(rows, c.rail);
+    if (railVals.length) {
+      const maxRail = Math.max(...railVals);
+      if (maxRail <= 25.0) { // Logged in MPa (15-20 MPa)
+        rows.forEach(r => {
+          if (numeric(r[c.rail])) r[c.rail] = +(r[c.rail] * 145.038).toFixed(0);
+          if (c.railTarget && numeric(r[c.railTarget])) r[c.railTarget] = +(r[c.railTarget] * 145.038).toFixed(0);
+        });
+        dataNotes.push('Normalized Fuel Rail Pressure from MPa to PSI.');
+      } else if (maxRail <= 250.0) { // Logged in Bar (150-200 bar)
+        rows.forEach(r => {
+          if (numeric(r[c.rail])) r[c.rail] = +(r[c.rail] * 14.5038).toFixed(0);
+          if (c.railTarget && numeric(r[c.railTarget])) r[c.railTarget] = +(r[c.railTarget] * 14.5038).toFixed(0);
+        });
+        dataNotes.push('Normalized Fuel Rail Pressure from Bar to PSI.');
+      }
+    }
+  }
+
+  // 3. Normalize Airflow: Convert grams/sec (g/s) to lb/min if peak > 70
+  if (c.airflow) {
+    const aVals = nums(rows, c.airflow);
+    if (aVals.length && Math.max(...aVals) > 70.0) {
+      rows.forEach(r => {
+        if (numeric(r[c.airflow])) r[c.airflow] = +(r[c.airflow] * 0.132277).toFixed(2);
+      });
+      dataNotes.push('Converted Airflow from grams/sec (g/s) to lb/min.');
+    }
+  }
+
+  // 4. Cross-Derive Lambda <-> AFR for logger agnosticism
+  const cfg = lim();
+  if (!c.lambda && c.afr) {
+    rows.forEach(r => {
+      if (numeric(r[c.afr])) r['Derived_Lambda'] = +(r[c.afr] / cfg.stoich).toFixed(3);
+    });
+    c.lambda = 'Derived_Lambda';
+    headers.push('Derived_Lambda');
+  } else if (c.lambda && !c.afr) {
+    rows.forEach(r => {
+      if (numeric(r[c.lambda])) r['Derived_AFR'] = +(r[c.lambda] * cfg.stoich).toFixed(2);
+    });
+    c.afr = 'Derived_AFR';
+    headers.push('Derived_AFR');
+  }
+
+// 5. Normalize Knock Retard Polarity (Force all knock retard channels to negative degrees)
+  for (let i = 1; i <= 4; i++) {
+    const k = c['knock' + i];
+    if (k) {
+      const kVals = nums(rows, k);
+      if (kVals.length) {
+        const maxK = Math.max(...kVals);
+        const minK = Math.min(...kVals);
+        if (maxK > 0.4 && minK >= 0.0) {
+          rows.forEach(r => {
+            if (numeric(r[k])) r[k] = -Math.abs(r[k]);
+          });
+          dataNotes.push(`Inverted Cyl ${i} Knock Retard from positive to negative degrees.`);
+        }
+      }
+    }
+  }
+
+  // 6. Generate Synthetic Instantaneous Delta Boost (Actual - Target)
+  if (c.boost && c.target) {
+    rows.forEach(r => {
+      if (numeric(r[c.boost]) && numeric(r[c.target])) {
+        r['Delta_Boost_psi'] = +(r[c.boost] - r[c.target]).toFixed(2);
+      } else {
+        r['Delta_Boost_psi'] = null;
+      }
+    });
+    if (!headers.includes('Delta_Boost_psi')) headers.push('Delta_Boost_psi');
+    c.boostErr = 'Delta_Boost_psi';
+  }
+
+  // 7. Auto-Derive Gear from Vehicle Speed and Engine RPM if Current_Gear is missing
+  if (!c.gear && c.rpm && c.speed) {
+    const isDct = (cfg.transType === 'dct');
+    rows.forEach(r => {
+      const rpm = r[c.rpm], spd = r[c.speed];
+      if (numeric(rpm) && numeric(spd) && spd > 6) {
+        const ratio = rpm / spd;
+        let g = 0;
+        if (isDct) {
+          if (ratio > 155) g = 1;
+          else if (ratio > 102) g = 2;
+          else if (ratio > 78) g = 3;
+          else if (ratio > 61) g = 4;
+          else if (ratio > 48) g = 5;
+          else if (ratio > 38) g = 6;
+          else if (ratio > 31) g = 7;
+          else g = 8;
+        } else {
+          if (ratio > 125) g = 1;
+          else if (ratio > 82) g = 2;
+          else if (ratio > 60) g = 3;
+          else if (ratio > 46) g = 4;
+          else if (ratio > 36) g = 5;
+          else g = 6;
+        }
+        r['Estimated_Gear'] = g;
+      } else {
+        r['Estimated_Gear'] = null;
+      }
+    });
+    if (!headers.includes('Estimated_Gear')) headers.push('Estimated_Gear');
+    c.gear = 'Estimated_Gear';
+    dataNotes.push(`Auto-derived transmission gear from RPM/Speed ratio (${isDct ? '8-DCT' : '6-MT'} calibration).`);
+  }
+}
+// Requirement F: Sample Rate, Jitter & Held Channels
+function analyzeSampleRateAndJitter(data, headersList){
+  const timeKey = detected.out.time || headersList.find(h => /time|t_ms/i.test(h));
+  if(!timeKey || data.length < 5) {
+    sampleRateHz = 16.0;
+    sampleJitterMs = 2.0;
+    return;
+  }
+  const times = data.map(r => Number(r[timeKey])).filter(numeric);
+  if(times.length < 5) return;
+  const isMs = times[1] > 100;
+  const tArr = times.map(t => isMs ? t / 1000.0 : t);
+  
+  const diffs = [];
+  for(let i=1; i<tArr.length; i++){
+    const dt = tArr[i] - tArr[i-1];
+    if(dt > 0 && dt < 1.0) diffs.push(dt);
+  }
+  if(diffs.length){
+    const meanDt = diffs.reduce((a,b)=>a+b,0) / diffs.length;
+    sampleRateHz = +(1.0 / meanDt).toFixed(1);
+    const variance = diffs.reduce((a,b)=>a + Math.pow(b - meanDt, 2), 0) / diffs.length;
+    sampleJitterMs = +(Math.sqrt(variance) * 1000).toFixed(1);
+  } else {
+    sampleRateHz = 16.0;
+    sampleJitterMs = 2.0;
+  }
+
+  heldChannelUpdateRates = {};
+  headersList.forEach(h => {
+    if(/^t_ms_/i.test(h)){
+      const parentName = h.replace(/^t_ms_/i, '');
+      const parentCol = headersList.find(k => norm(k) === norm(parentName) || norm(k).includes(norm(parentName)));
+      if(parentCol){
+        const pVals = data.map(r => r[parentCol]);
+        let changes = 0;
+        for(let i=1; i<pVals.length; i++){
+          if(pVals[i] !== pVals[i-1]) changes++;
+        }
+        const totalSec = tArr[tArr.length - 1] - tArr[0];
+        heldChannelUpdateRates[parentCol] = totalSec > 0 ? +(changes / totalSec).toFixed(1) : sampleRateHz;
+      }
+    }
+  });
+}
+
+// Requirement A: Compare 4 Knock Channels, Global Retard & Event Grouping
+function classifyKnockAndEvents(data, c){
+  globalIgnitionRetardCount = 0;
+  cylinderKnockEvents = [];
+  const knockKeys = [1,2,3,4].map(i => c['knock'+i]).filter(Boolean);
+  if(!knockKeys.length) return;
+
+  const labels = ['A', 'B', 'C', 'D'];
+  const rowKnockData = [];
+
+  data.forEach((r, idx) => {
+    const kVals = knockKeys.map(k => numeric(r[k]) ? r[k] : 0);
+    if(kVals.length < 4) return;
+
+    const minK = Math.min(...kVals);
+    const maxK = Math.max(...kVals);
+    const allNegative = kVals.every(v => v < 0);
+    const isGlobal = allNegative && (maxK - minK <= 0.01);
+
+    if(isGlobal){
+      globalIgnitionRetardCount++;
+      rowKnockData.push({ idx, isGlobal: true, specific: [] });
+      return;
+    }
+
+    const specificHits = [];
+    kVals.forEach((val, kidx) => {
+      const others = kVals.filter((_, i) => i !== kidx).sort((a,b)=>a-b);
+      const medianOfOthers = (others[1] + others[2]) / 2.0;
+      if(val <= medianOfOthers - 0.75){
+        specificHits.push({ cylinder: labels[kidx], val });
+      }
+    });
+
+    if(specificHits.length >= 1 && specificHits.length <= 2){
+      rowKnockData.push({ idx, isGlobal: false, specific: specificHits });
+    } else {
+      rowKnockData.push({ idx, isGlobal: false, specific: [] });
+    }
+  });
+
+  const timeKey = c.time, boostKey = c.boost, rpmKey = c.rpm, gearKey = c.gear, pedalKey = c.throttle;
+  let activeEvents = {};
+
+  const closeEvent = (cyl) => {
+    if(!activeEvents[cyl]) return;
+    const ev = activeEvents[cyl];
+    const startRow = data[ev.startIndex];
+    const endRow = data[ev.endIndex];
+    let dur = 0.065;
+    if(timeKey && numeric(startRow[timeKey]) && numeric(endRow[timeKey])){
+      dur = Math.max(0.06, endRow[timeKey] - startRow[timeKey]);
+    } else {
+      dur = +((ev.endIndex - ev.startIndex + 1) * 0.062).toFixed(2);
+    }
+    cylinderKnockEvents.push({
+      cylinder: ev.cylinder,
+      peak: +ev.peak.toFixed(2),
+      durationSec: +dur.toFixed(2),
+      rpm: Math.round(ev.rpmList.reduce((a,b)=>a+b,0) / ev.rpmList.length),
+      boost: +(Math.max(...ev.boostList)).toFixed(1),
+      gear: ev.gearList[0],
+      pedal: Math.round(ev.pedalList.reduce((a,b)=>a+b,0) / ev.pedalList.length)
+    });
+    delete activeEvents[cyl];
+  };
+
+  rowKnockData.forEach(rd => {
+    const r = data[rd.idx];
+    const boostVal = boostKey && numeric(r[boostKey]) ? r[boostKey] : 6.0;
+    const canScore = boostVal > 5.0;
+
+    if(!canScore){
+      ['A','B','C','D'].forEach(closeEvent);
+      return;
+    }
+
+    ['A','B','C','D'].forEach(cyl => {
+      const hit = rd.specific.find(s => s.cylinder === cyl);
+      if(hit){
+        if(!activeEvents[cyl]){
+          activeEvents[cyl] = {
+            cylinder: cyl,
+            startIndex: rd.idx,
+            endIndex: rd.idx,
+            peak: hit.val,
+            rpmList: [rpmKey && numeric(r[rpmKey]) ? r[rpmKey] : 0],
+            boostList: [boostVal],
+            gearList: [gearKey && numeric(r[gearKey]) ? r[gearKey] : 1],
+            pedalList: [pedalKey && numeric(r[pedalKey]) ? r[pedalKey] : 100]
+          };
+        } else {
+          activeEvents[cyl].endIndex = rd.idx;
+          if(hit.val < activeEvents[cyl].peak) activeEvents[cyl].peak = hit.val;
+          if(rpmKey && numeric(r[rpmKey])) activeEvents[cyl].rpmList.push(r[rpmKey]);
+          activeEvents[cyl].boostList.push(boostVal);
+          if(gearKey && numeric(r[gearKey])) activeEvents[cyl].gearList.push(r[gearKey]);
+          if(pedalKey && numeric(r[pedalKey])) activeEvents[cyl].pedalList.push(r[pedalKey]);
+        }
+      } else {
+        closeEvent(cyl);
+      }
+    });
+  });
+  ['A','B','C','D'].forEach(closeEvent);
+}
+
+// Requirement C: Lambda 0.5s Rolling Median
+function evaluateLambdaRollingMedian(data, c){
+  lambdaLeanFlagsCount = 0;
+  lambdaDeepRichCount = 0;
+  if(!c.lambda || !c.boost) return;
+  const cfg = lim();
+
+  const activeRows = data.filter(r => numeric(r[c.boost]) && r[c.boost] >= 12 && numeric(r[c.lambda]));
+  if(activeRows.length < 8) return;
+
+  const validDeltas = [];
+  activeRows.forEach(r => {
+    const target = (c.lambdaTarget && numeric(r[c.lambdaTarget])) ? r[c.lambdaTarget] : 0.80;
+    const diff = r[c.lambda] - target;
+    if(diff < -0.15){
+      lambdaDeepRichCount++;
+    } else {
+      validDeltas.push(diff);
+    }
+  });
+
+  const windowSize = Math.max(5, Math.round(sampleRateHz * 0.5));
+  for(let i = windowSize - 1; i < validDeltas.length; i++){
+    const slice = validDeltas.slice(i - windowSize + 1, i + 1).sort((a,b)=>a-b);
+    const median = slice[Math.floor(slice.length / 2)];
+    if(median > cfg.lambdaMargin){
+      lambdaLeanFlagsCount++;
+    }
+  }
+}
+
+// Requirement D: Unexplained Fueling Transients (Pedal > 60%)
+function evaluateFuelingTransients(data, c){
+  unexplainedFuelingTransients = [];
+  const injKeys = [c.injA, c.injB, c.injC, c.injD].filter(Boolean);
+  if(!c.throttle) return;
+
+  data.forEach((r, idx, arr) => {
+    const th = numeric(r[c.throttle]) ? r[c.throttle] : 0;
+    if(th <= 60) return;
+
+    let injSpike = false;
+    if(injKeys.length){
+      const rowInjVals = injKeys.map(k => numeric(r[k]) ? r[k] : 0);
+      const maxInj = Math.max(...rowInjVals);
+      const start = Math.max(0, idx - 10);
+      const end = Math.min(arr.length - 1, idx + 10);
+      const windowInj = [];
+      for(let k = start; k <= end; k++){
+        injKeys.forEach(kName => { if(numeric(arr[k][kName])) windowInj.push(arr[k][kName]); });
+      }
+      if(windowInj.length >= 5){
+        windowInj.sort((a,b)=>a-b);
+        const localMedianInj = windowInj[Math.floor(windowInj.length / 2)];
+        if(maxInj > (localMedianInj * 1.6)) injSpike = true;
+      }
+    }
+
+    const railDrop = c.rail && c.railTarget && numeric(r[c.rail]) && numeric(r[c.railTarget]) && (r[c.rail] < r[c.railTarget] * 0.85);
+    const lambdaDrop = c.lambda && c.lambdaTarget && numeric(r[c.lambda]) && numeric(r[c.lambdaTarget]) && (r[c.lambda] < r[c.lambdaTarget] - 0.10);
+
+    if(injSpike || railDrop || lambdaDrop){
+      const tVal = c.time && numeric(r[c.time]) ? r[c.time] : (idx * 0.062);
+      unexplainedFuelingTransients.push({
+        rowIdx: idx + 2,
+        time: +tVal.toFixed(2),
+        reason: injSpike ? 'Injector duration > 1.6x 21-row median' : (railDrop ? 'Rail pressure >15% below target' : 'Lambda >0.10 below target')
+      });
+    }
+  });
+}
+
+// Requirement E: LPFP Median and Largest Drop
+function analyzeLpfpMetrics(data, c){
+  if(!c.lpfp){ lpfpMedianVal = 0; lpfpMaxDrop = 0; return; }
+  const lpVals = nums(data, c.lpfp);
+  if(!lpVals.length) return;
+
+  const sorted = [...lpVals].sort((a,b)=>a-b);
+  lpfpMedianVal = Math.round(sorted[Math.floor(sorted.length / 2)]);
+
+  let maxDrop = 0;
+  const w = 15;
+  for(let i = w; i < lpVals.length; i++){
+    const slice = lpVals.slice(i - w, i).sort((a,b)=>a-b);
+    const rollMed = slice[Math.floor(slice.length / 2)];
+    const drop = rollMed - lpVals[i];
+    if(drop > maxDrop) maxDrop = drop;
+  }
+  lpfpMaxDrop = +maxDrop.toFixed(1);
+}
+function detectPulls(data, c){
  const out=[]; const rpm=c.rpm, th=c.throttle, boost=c.boost;
  if(!rpm) return out;
  const cfg = lim();
  let start = -1;
+ let lastValidWotIndex = -1;
  let dipGraceFrames = 0;
- let liftGraceFrames = 0;
  let lastRpm = null;
  const rawPulls = [];
 
- for(let i=0; i<data.length; i++){
+ for(let i = 0; i < data.length; i++){
    const r = data[i];
    const rv = r[rpm], tv = th ? r[th] : null, bv = boost ? r[boost] : null;
    const throttleOk = th ? (numeric(tv) && tv >= cfg.wotFloor) : true;
@@ -627,22 +1652,23 @@ function detectPulls(data,c){
 
    const activeWot = plausible && rising;
 
-   if(activeWot && start < 0){
-     start = i;
-     liftGraceFrames = 0;
-   } else if(start >= 0 && !activeWot){
-     liftGraceFrames++;
-     if(liftGraceFrames > 5 || i === data.length - 1){
-       const actualEnd = Math.max(start, i - 1);
-       if(actualEnd - start >= 18){
-         rawPulls.push({start, end: actualEnd, label:`rows ${start+1}–${actualEnd+1}`});
-       }
-       start = -1;
-       liftGraceFrames = 0;
-       dipGraceFrames = 0;
+   if(activeWot){
+     if(start < 0) start = i;
+     lastValidWotIndex = i; // Requirement B: Mark exact last row meeting powered active-WOT
+   } else if(start >= 0){
+     // Cut off pull immediately at lastValidWotIndex (omitting clutch-in flare)
+     if(lastValidWotIndex - start >= 12){
+       rawPulls.push({ start, end: lastValidWotIndex, label: `rows ${start+1}–${lastValidWotIndex+1}` });
      }
+     start = -1;
+     lastValidWotIndex = -1;
+     dipGraceFrames = 0;
    }
    lastRpm = numeric(rv) ? rv : lastRpm;
+ }
+
+ if(start >= 0 && lastValidWotIndex - start >= 12){
+   rawPulls.push({ start, end: lastValidWotIndex, label: `rows ${start+1}–${lastValidWotIndex+1}` });
  }
 
  const linkShifts = $('shift-link-toggle')?.checked ?? false;
@@ -653,17 +1679,17 @@ function detectPulls(data,c){
      const next = rawPulls[k];
      const gapTime = data[next.start][c.time] - data[current.end][c.time];
      if(gapTime >= 0.1 && gapTime <= (cfg.shiftWindow + 0.1)){
-       current = {start: current.start, end: next.end, label: `Linked: rows ${current.start+1}–${next.end+1}`, isLinked: true};
+       current = { start: current.start, end: next.end, label: `Linked: rows ${current.start+1}–${next.end+1}`, isLinked: true };
      } else {
        linked.push(current);
        current = next;
      }
    }
    linked.push(current);
-   return linked.map((p, idx) => ({...p, label: `Pull ${idx+1} (${p.label})`}));
+   return linked.map((p, idx) => ({ ...p, label: `Pull ${idx+1} (${p.label})` }));
  }
 
- return rawPulls.map((p, idx) => ({...p, label: `Pull ${idx+1}: ${p.label}`}));
+ return rawPulls.map((p, idx) => ({ ...p, label: `Pull ${idx+1}: ${p.label}` }));
 }
 
 function interpolateCrossingTime(d, col, targetVal, timeCol){
@@ -685,6 +1711,7 @@ function interpolateCrossingTime(d, col, targetVal, timeCol){
 
 function pullStats(){
   const c = detected.out;
+  const cfg = lim();
   return pulls.map((p, i) => {
     const d = rows.slice(p.start, p.end + 1);
     const x = k => k ? extrema(k, d) : null;
@@ -695,6 +1722,18 @@ function pullStats(){
     };
     const bd = diff(c.boost, c.target), rd = diff(c.railTarget, c.rail), ld = diff(c.lambda, c.lambdaTarget);
     const kn = [1, 2, 3, 4].map(k => x(c['knock' + k])).filter(Boolean).map(e => e.min);
+    // Cumulative Knock Severity Load: Integral of retard over time (degree-seconds)
+    let knockSeverityLoad = 0;
+    if (c.time && d.length >= 2) {
+      for (let k = 0; k < d.length - 1; k++) {
+        const dt = Math.max(0, d[k+1][c.time] - d[k][c.time]);
+        const kVals = [1, 2, 3, 4].map(idx => c['knock' + idx]).filter(Boolean).map(key => d[k][key]).filter(numeric);
+        const worstRetard = kVals.length ? Math.min(...kVals) : 0;
+        if (worstRetard <= cfg.knockFloor && !(worstRetard <= -5.620 && worstRetard >= -5.630)) {
+          knockSeverityLoad += Math.abs(worstRetard) * dt;
+        }
+      }
+    }
     const t0 = c.time ? d[0][c.time] : null, t1 = c.time ? d[d.length - 1][c.time] : null;
 
     let spoolRate = null;
@@ -775,6 +1814,7 @@ function pullStats(){
       iatMax: x(c.iat)?.max,
       iatDelta: iatDelta,
       knockMin: kn.length ? Math.min(...kn) : null,
+      knockLoad: +knockSeverityLoad.toFixed(2),
       timingMin: x(c.timing)?.min,
       tqPk: x(c.tq)?.max,
       pwrPk: x(c.hp)?.max
@@ -835,55 +1875,67 @@ function syncInspectorToRow(rawIdx){
     });
   }
 }
-function parseText(text,filename){
- text=String(text||'').replace(/^\uFEFF/,'');
- if(!text.trim())throw new Error('The file is empty or could not be read.');
- if(/session report/i.test(text.slice(0,200)))throw new Error('This looks like a SIM2K session report, not a telemetry CSV. Pick the matching .csv file instead.');
- const result=Papa.parse(text,{header:true,skipEmptyLines:'greedy',dynamicTyping:false,delimiter:sniffDelimiter(text),transformHeader:h=>h.trim()});
- const parsed=result.data.filter(r=>Object.values(r).some(v=>String(v??'').trim()!==''));
- if(!result.meta.fields?.length||!parsed.length)throw new Error('CSV has no usable headers or data rows.');
- headers=result.meta.fields.map(h=>h.trim());
- rows=parsed.map((r,index)=>{
-   const o={__row:index+2, __idx:index};
-   for(const h of headers){
-     let v=String(r[h]??'').trim();
-     if(v===''){o[h]=null;continue;}
-     const n=Number(v.replace(/,/g,''));
-     o[h]=Number.isFinite(n)&&v!==''?n:v;
+
+function parseText(text, filename){
+ text = String(text || '').replace(/^\uFEFF/, '');
+ if (!text.trim()) throw new Error('The file is empty or could not be read.');
+ if (/session report/i.test(text.slice(0, 200))) throw new Error('This looks like a SIM2K session report, not a telemetry CSV. Pick the matching .csv file instead.');
+ 
+ const result = Papa.parse(text, { header: true, skipEmptyLines: 'greedy', dynamicTyping: false, delimiter: sniffDelimiter(text), transformHeader: h => h.trim() });
+ const parsed = result.data.filter(r => Object.values(r).some(v => String(v ?? '').trim() !== ''));
+ if (!result.meta.fields?.length || !parsed.length) throw new Error('CSV has no usable headers or data rows.');
+ 
+ headers = result.meta.fields.map(h => h.trim());
+ rows = parsed.map((r, index) => {
+   const o = { __row: index + 2, __idx: index };
+   for (const h of headers) {
+     let v = String(r[h] ?? '').trim();
+     if (v === '') { o[h] = null; continue; }
+     const n = Number(v.replace(/,/g, ''));
+     o[h] = Number.isFinite(n) && v !== '' ? n : v;
    }
    return o;
  });
- currentFile=filename;
- detected=detectChannels(headers);mappingInfo=detected.info;
+
+ currentFile = filename;
+ detected = detectChannels(headers);
+ mappingInfo = detected.info;
  cleanRows(detected.out);
- 
+ analyzeSampleRateAndJitter(rows, headers);
+ classifyKnockAndEvents(rows, detected.out);
+ evaluateLambdaRollingMedian(rows, detected.out);
+ evaluateFuelingTransients(rows, detected.out);
+ analyzeLpfpMetrics(rows, detected.out);
+ // 1. Determine Ambient Barometric Pressure first
  const baroKey = detected.out.baro;
  const baroInput = $('comp-baro-override');
- if(baroKey && nums(rows, baroKey).length){
+ if (baroKey && nums(rows, baroKey).length) {
    const bVals = nums(rows, baroKey);
    ambientBaroPsi = bVals[0] > 50 ? +(bVals[0] * 0.145038).toFixed(2) : +bVals[0].toFixed(2);
-   if(baroInput) baroInput.value = ambientBaroPsi.toFixed(2);
+   if (baroInput) baroInput.value = ambientBaroPsi.toFixed(2);
    setTxt('baro-source-tag', '(Logged)');
  } else {
    ambientBaroPsi = 14.50;
-   if(baroInput) baroInput.value = '14.50';
+   if (baroInput) baroInput.value = '14.50';
    setTxt('baro-source-tag', '(Midlands Default)');
  }
 
- pulls=detectPulls(rows,detected.out);
- pullData=pullStats();
+ // 2. Normalize units using the detected ambient pressure
+ normalizeTelemetry(detected.out);
+
+ pulls = detectPulls(rows, detected.out);
+ pullData = pullStats();
  
- if($('empty')) $('empty').classList.add('hidden');
- if($('workspace')) $('workspace').classList.remove('hidden');
- if($('report-btn')) $('report-btn').disabled=false;
+ if ($('empty')) $('empty').classList.add('hidden');
+ if ($('workspace')) $('workspace').classList.remove('hidden');
+ if ($('report-btn')) $('report-btn').disabled = false;
  
  setTxt('filename', filename);
- setTxt('rowinfo', `${rows.length.toLocaleString()} rows · ${headers.length} columns · Cherry Logger Telemetry`);
- 
+setTxt('rowinfo', `${rows.length.toLocaleString()} rows · ${headers.length} columns · ${sampleRateHz} Hz (${sampleJitterMs} ms jitter)`); 
  inspectorPage = 0;
  syncedRowIndex = null;
  isCursorLocked = false;
- if($('lock-status')) $('lock-status').classList.add('hidden');
+ if ($('lock-status')) $('lock-status').classList.add('hidden');
  
  setupSelectors();
  renderAll();
@@ -960,12 +2012,13 @@ function knockChannelMinima(data=getWindowRows()){
    if(kv <= -5.620 && kv >= -5.630 && thKey && numeric(r[thKey]) && r[thKey] < 50) return;
    if(thKey && numeric(r[thKey]) && r[thKey] < cfg.wotFloor) return;
 
-   let isShiftShock = false;
+  let isShiftShock = false;
    if(gearKey && timeKey && numeric(r[timeKey])){
      const curTime = r[timeKey];
-     for(let k = Math.max(0, index - 6); k <= Math.min(data.length - 1, index + 3); k++){
+     const shockWindow = cfg.shiftShockWindow || 0.40;
+     for(let k = Math.max(0, index - 8); k <= Math.min(data.length - 1, index + 4); k++){
        const pr = data[k];
-       if(pr[gearKey] !== r[gearKey] && Math.abs(pr[timeKey] - curTime) <= 0.25){
+       if(pr[gearKey] !== r[gearKey] && Math.abs(pr[timeKey] - curTime) <= shockWindow){
          isShiftShock = true;
          break;
        }
@@ -973,8 +2026,10 @@ function knockChannelMinima(data=getWindowRows()){
    }
 
    let isRealAcoustic = false;
-   if(kv <= -0.75 && !isShiftShock){
+   let isSingleFrameNoise = false;
+   if(kv <= cfg.knockFloor && !isShiftShock){
      let stepRamps = 0;
+     let nextFrameValue = (index + 1 < data.length) ? data[index + 1][key] : null;
      for(let k = index + 1; k <= Math.min(data.length - 1, index + 8); k++){
        const pr = data[k];
        if(thKey && numeric(pr[thKey]) && pr[thKey] < cfg.wotFloor) break;
@@ -984,10 +2039,12 @@ function knockChannelMinima(data=getWindowRows()){
        }
      }
      isRealAcoustic = stepRamps >= 2;
+     // If retard restores toward zero on the very next frame, it is isolated acoustic flutter / mount vibration
+     isSingleFrameNoise = !isRealAcoustic && (nextFrameValue === null || nextFrameValue >= -0.25 || nextFrameValue === 0.0);
    }
 
-   if(!worst || kv < worst.value) {
-     worst={label:labels[i-1],key,value:kv,row:r,index,rawIdx:r.__idx,isRealAcoustic,isShiftShock};
+if(!worst || kv < worst.value) {
+     worst={label:labels[i-1],key,value:kv,row:r,index,rawIdx:r.__idx,isRealAcoustic,isSingleFrameNoise,isShiftShock};
    }
   });
 
@@ -1003,7 +2060,89 @@ function knockChannelMinima(data=getWindowRows()){
  }
  return out;
 }
+function diagnoseOctaneLearning(pullDataRows, c) {
+  if (!pullDataRows || !pullDataRows.length || !c.boost || !c.rpm) {
+    return { status: 'UNKNOWN', text: 'No Boost/RPM', sub: 'Inconclusive', badge: 'neutral', dotColor: 'text-slate-500 bg-slate-500' };
+  }
 
+  const cfg = lim();
+
+  // Filter for WOT pull frames between 3,400 and 5,600 RPM
+  const midRangeWot = pullDataRows.filter(r => {
+    const rpm = r[c.rpm];
+    const th = c.throttle && numeric(r[c.throttle]) ? r[c.throttle] : 100;
+    return rpm >= 3400 && rpm <= 5600 && th >= 80;
+  });
+
+  if (midRangeWot.length < 8) {
+    return { status: 'INCONCLUSIVE', text: 'Sweep Too Short', sub: 'Need 3.5k–5.5k WOT', badge: 'neutral', dotColor: 'text-amber-400 bg-amber-400' };
+  }
+
+  const boostVals = nums(midRangeWot, c.boost);
+  const peakBoost = Math.max(...boostVals);
+  const avgBoost = boostVals.reduce((a, b) => a + b, 0) / boostVals.length;
+
+  let avgTiming = null;
+  if (c.timing) {
+    const tVals = nums(midRangeWot, c.timing);
+    if (tVals.length) avgTiming = tVals.reduce((a, b) => a + b, 0) / tVals.length;
+  }
+
+  // Tune-Adaptive Thresholds
+  let targetBoostLearned = 18.2, targetBoostUnlearned = 16.5;
+  let minLearnedTiming = 8.5; // deg advance at mid-RPM
+
+  if (cfg.tuneProfile === 'stage1') {
+    targetBoostLearned = 20.5;
+    targetBoostUnlearned = 18.5;
+    minLearnedTiming = 10.0;
+  } else if (cfg.tuneProfile === 'stage2') {
+    targetBoostLearned = 22.8;
+    targetBoostUnlearned = 20.0;
+    minLearnedTiming = 11.5;
+  } else if (cfg.tuneProfile === 'jb4') {
+    targetBoostLearned = 19.5;
+    targetBoostUnlearned = 17.0;
+    minLearnedTiming = 7.5;
+  }
+
+  const timingOk = avgTiming === null || avgTiming >= minLearnedTiming;
+
+  if (peakBoost >= targetBoostLearned && avgBoost >= (targetBoostLearned - 1.2) && timingOk) {
+    return {
+      status: 'LEARNED',
+      text: 'Learned (Active)',
+      sub: `${peakBoost.toFixed(1)} PSI Peak · ${avgBoost.toFixed(1)} Avg${avgTiming ? ` · ${avgTiming.toFixed(1)}° Adv` : ''}`,
+      badge: 'good',
+      dotColor: 'text-emerald-400 bg-emerald-400',
+      peakBoost,
+      avgBoost,
+      avgTiming
+    };
+  } else if (peakBoost <= targetBoostUnlearned) {
+    return {
+      status: 'NOT_LEARNED',
+      text: 'Not Learned',
+      sub: `${peakBoost.toFixed(1)} PSI Plateau (Cap: ~${targetBoostUnlearned} PSI)`,
+      badge: 'bad',
+      dotColor: 'text-red-500 bg-red-500',
+      peakBoost,
+      avgBoost,
+      avgTiming
+    };
+  } else {
+    return {
+      status: 'PARTIAL',
+      text: 'Marginal State',
+      sub: `${peakBoost.toFixed(1)} PSI Peak (Transitional)`,
+      badge: 'warn',
+      dotColor: 'text-amber-400 bg-amber-400',
+      peakBoost,
+      avgBoost,
+      avgTiming
+    };
+  }
+}
 function calculateScorecard(data){
  const c = detected.out;
  const cfg = lim();
@@ -1248,17 +2387,33 @@ function renderPullCard(){
 function addFinding(type, title, message, eventIdx = null){
   const el = $('findings'); if(!el) return;
   const d = document.createElement('div');
-  d.className = 'panel p-4 flex flex-col justify-between';
+  const borderTone = type === 'bad' ? 'border-l-4 border-l-rose-500 bg-rose-950/20' : (type === 'warn' ? 'border-l-4 border-l-amber-500 bg-amber-950/15' : 'border-l-4 border-l-emerald-500 bg-emerald-950/15');
+  const icon = type === 'bad' ? 'alert-octagon' : (type === 'warn' ? 'alert-triangle' : 'check-circle-2');
+  const iconColor = type === 'bad' ? 'text-rose-400' : (type === 'warn' ? 'text-amber-400' : 'text-emerald-400');
+  d.className = `panel p-4 flex flex-col justify-between transition hover:border-rose-500/50 ${borderTone}`;
   const cls = type === 'bad' ? 'bad' : (type === 'warn' ? 'warn' : (type === 'good' ? 'good' : 'neutral'));
+  
+  // Format numbers and channel tokens inside monospace badges
+  const formattedMsg = escapeHtml(message).replace(/([+-]?\d+(?:\.\d+)?(?:\s*(?:°|°F|%|PSI|ms|lb\/min|λ|RPM|mph))?)/g, '<span class="px-1.5 py-0.2 rounded bg-black/60 border border-rose-950/80 font-mono text-rose-200 text-xs">$1</span>');
+
   let jumpBtn = '';
   if(eventIdx !== null && eventIdx >= 0){
-    jumpBtn = `<div class="mt-3 pt-2 border-t border-rose-950 flex justify-end">
-      <button class="jump-btn text-xs bg-black/60 hover:bg-rose-950/60 border border-rose-900 hover:border-rose-600 text-rose-300 px-2.5 py-1 rounded flex items-center gap-1.5 transition" data-row="${eventIdx}">
-        <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> Jump to Event (Row ${eventIdx + 2})
+    jumpBtn = `<div class="mt-3 pt-2.5 border-t border-rose-950/60 flex justify-end">
+      <button class="jump-btn text-[11px] font-mono bg-black/60 hover:bg-rose-950/60 border border-rose-900/80 hover:border-rose-500 text-rose-300 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition" data-row="${eventIdx}">
+        <i data-lucide="crosshair" class="w-3.5 h-3.5 text-rose-400"></i> Jump to Event (Row ${eventIdx + 2})
       </button>
     </div>`;
   }
-  d.innerHTML = `<div><div class="flex items-center justify-between gap-2 mb-2"><h4 class="font-semibold text-white text-sm">${escapeHtml(title)}</h4><span class="pill ${cls}">${type === 'bad' ? 'Review' : (type === 'warn' ? 'Caution' : (type === 'good' ? 'Observed' : 'Info'))}</span></div><p class="text-sm text-slate-300 leading-relaxed">${escapeHtml(message)}</p></div>${jumpBtn}`;
+  d.innerHTML = `<div>
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex items-center gap-2">
+        <i data-lucide="${icon}" class="w-4 h-4 ${iconColor}"></i>
+        <h4 class="font-bold text-white text-sm">${escapeHtml(title)}</h4>
+      </div>
+      <span class="pill ${cls}">${type === 'bad' ? 'Review' : (type === 'warn' ? 'Caution' : (type === 'good' ? 'Observed' : 'Info'))}</span>
+    </div>
+    <p class="text-xs text-slate-300 leading-relaxed">${formattedMsg}</p>
+  </div>${jumpBtn}`;
   el.append(d);
   const btn = d.querySelector('.jump-btn');
   if(btn){
@@ -1274,7 +2429,36 @@ function renderDiagnostics(){
   const c = detected.out, data = getWindowRows(), sc = scopeInfo(), el = $('findings');
   if(el) el.innerHTML = '';
   const cfg = lim();
+// Requirement F: Sample Rate & Jitter
+    addFinding('good', `Telemetry Frequency: ${sampleRateHz} Hz (${sampleJitterMs} ms jitter)`, `Sampling frequency measured at ${sampleRateHz} Hz across ${rows.length.toLocaleString()} records with ${sampleJitterMs} ms timing jitter.`);
 
+    // Requirement A: Global Ignition Retard (Non-Knock)
+    if(globalIgnitionRetardCount > 0){
+      addFinding('good', 'Global Ignition Retard (Not Cylinder Knock)', `${globalIgnitionRetardCount} frame(s) observed where all 4 knock channels matched within 0.01° and were negative. Excluded from knock score.`);
+    }
+
+    // Requirement A: Cylinder Knock Events
+    if(cylinderKnockEvents.length > 0){
+      cylinderKnockEvents.forEach(ev => {
+        addFinding('bad', `Cylinder ${ev.cylinder} Knock Event`, `Peak ${ev.peak}° retard held for ${ev.durationSec} s at ${ev.rpm} RPM, ${ev.boost} PSI boost, Gear ${ev.gear}, Pedal ${ev.pedal}%. Scored by peak and duration.`);
+      });
+    } else {
+      addFinding('good', 'No Cylinder Knock Events', 'Zero isolated cylinder knock events exceeding threshold during boost > 5 PSI.');
+    }
+
+    // Requirement C: Rolling Median Lambda
+    if(lambdaLeanFlagsCount > 0){
+      addFinding('warn', 'Wideband Lambda Rolling Median Lean', `${lambdaLeanFlagsCount} rolling-median (0.5s) window(s) exceeded setpoint margin. ${lambdaDeepRichCount} transition frame(s) >0.15 below target isolated.`);
+    }
+
+    // Requirement D: Fueling Transient Finding
+    if(unexplainedFuelingTransients.length > 0){
+      const sample = unexplainedFuelingTransients[0];
+      addFinding('warn', 'Unexplained Fueling Transient - Investigate', `${unexplainedFuelingTransients.length} row(s) flagged with injector spike >1.6x 21-row median, rail pressure >15% below target, or lambda >0.10 below target while pedal >60% (e.g. Row ${sample.rowIdx} @ ${sample.time}s: ${sample.reason}).`);
+    }
+
+    // Requirement E: LPFP Metrics
+    addFinding('good', `In-Tank LPFP Feed (Median: ${lpfpMedianVal} PSI)`, `Log median is ${lpfpMedianVal} PSI with a maximum drop of ${lpfpMaxDrop} PSI from rolling median. Static floors marked UNVERIFIED.`);
   if(el){
     // 1. RPM Sensor
     if(!c.rpm) addFinding('warn', 'RPM channel not identified', 'No RPM header mapped. Pull segmentation and RPM-based analysis unavailable.');
@@ -1365,26 +2549,40 @@ function renderDiagnostics(){
     const steadyKnock = knockChannelMinima(data);
     if(!steadyKnock.length) addFinding('warn', 'Knock Channels Unmapped', 'No knock retard channels identified.');
     else {
-      const retardedCyls = steadyKnock.filter(x => x.value <= cfg.knockFloor && !(x.value <= -5.620 && x.value >= -5.630));
+const retardedCyls = steadyKnock.filter(x => x.value <= cfg.knockFloor && !(x.value <= -5.620 && x.value >= -5.630));
       const shiftShockEvents = retardedCyls.filter(x => x.isShiftShock);
       const acousticEvents = retardedCyls.filter(x => x.isRealAcoustic && !x.isShiftShock);
-      const mechanicalFlutter = retardedCyls.filter(x => !x.isRealAcoustic && !x.isShiftShock);
+      const mechanicalFlutter = retardedCyls.filter(x => (x.isSingleFrameNoise || (!x.isRealAcoustic && !x.isShiftShock)));
 
       if(acousticEvents.length === 1){
         const badCyl = acousticEvents[0];
-        addFinding('warn', `Isolated Cylinder ${badCyl.label} Retard (${fmt(badCyl.value, 2)}°)`, `Combustion detonation confirmed by step-wise recovery ramp on Cylinder ${badCyl.label}. Isolated thermal saturation or spark breakdown.`, badCyl.rawIdx);
+        addFinding('warn', `Combustion Knock Detonation (Step-Recovery Ramp Verified) - Cyl ${badCyl.label} (${fmt(badCyl.value, 2)}°)`, `Detonation confirmed by step-wise timing recovery on Cylinder ${badCyl.label}. Check spark plug gap, thermal soak, or cylinder variance.`, badCyl.rawIdx);
       } else if(acousticEvents.length >= 2){
         const cylList = acousticEvents.map(x => `${x.label}: ${fmt(x.value, 2)}°`).join(' · ');
         const worstRow = acousticEvents.reduce((m, x) => x.value < m.value ? x : m, acousticEvents[0]);
-        addFinding('bad', 'Multi-Cylinder Knock (Octane Deficit)', `Multiple cylinders recorded simultaneous acoustic detonation (${cylList}). Global octane shortfall under locked high-boost tables.`, worstRow?.rawIdx);
-      } else if(shiftShockEvents.length > 0){
-        const cylList = shiftShockEvents.map(x => `${x.label}: ${fmt(x.value, 2)}°`).join(' · ');
-        addFinding('good', 'Shift-Shock Driveline Impact Filtered', `Knock sensor activity detected during gear transition (${cylList}). Filtered as transmission driveline shockwave, not combustion knock.`);
-      } else if(mechanicalFlutter.length > 0){
-        const cylList = mechanicalFlutter.map(x => `${x.label}: ${fmt(x.value, 2)}°`).join(' · ');
-        addFinding('good', 'Chassis / Engine Mount Harmonic Flutter', `Observed single-frame knock sensor flutter without step-recovery (${cylList}). Filtered as mechanical mount vibration.`);
+        addFinding('bad', 'Combustion Knock Detonation (Multi-Cylinder Octane Deficit)', `Multiple cylinders confirmed acoustic step-recovery detonation (${cylList}). Fuel octane rating insufficient for commanded boost and timing.`, worstRow?.rawIdx);
       } else {
-        addFinding('good', 'Clean Ignition Timing Ramp', `Zero sustained knock retard below ${cfg.knockFloor}° across all 4 cylinders.`);
+        let hasBenignEvents = false;
+        if(shiftShockEvents.length > 0){
+          hasBenignEvents = true;
+          const cylList = shiftShockEvents.map(x => `${x.label}: ${fmt(x.value, 2)}°`).join(' · ');
+          addFinding('good', `Driveline Shift-Shock Filtered (${cfg.transType.toUpperCase()})`, `Knock sensor spike detected during gear handoff (${cylList}). Filtered as transmission driveline shockwave within ${cfg.shiftShockWindow}s window.`);
+        }
+        if(mechanicalFlutter.length > 0){
+          hasBenignEvents = true;
+          const cylList = mechanicalFlutter.map(x => `${x.label}: ${fmt(x.value, 2)}°`).join(' · ');
+          addFinding('good', 'Transient Harmonic Noise / Driveline Jitter (Single-Frame Filtered)', `Single-frame knock jitter observed without step-wise recovery ramp (${cylList}). Characteristic of engine mount or chassis vibration.`);
+        }
+        const activePullIndex = $('pull-select')?.value;
+        const currentPullStat = (activePullIndex !== 'all' && pullData[Number(activePullIndex)]) ? pullData[Number(activePullIndex)] : null;
+        if (currentPullStat && currentPullStat.knockLoad > 0.40) {
+          addFinding('warn', `High Cumulative Knock Load (${currentPullStat.knockLoad} deg·s)`, 
+            `Detonation energy was sustained over time (Total knock integral: ${currentPullStat.knockLoad} degree-seconds across pull). Check octane or reduce ignition timing table.`, 
+            acousticEvents[0]?.rawIdx);
+        }
+        if(!hasBenignEvents){
+          addFinding('good', 'Clean Ignition Advance Ramp', `Zero sustained knock retard below ${cfg.knockFloor}° across all 4 cylinders.`);
+        }
       }
     }
 
@@ -1415,14 +2613,30 @@ function renderDiagnostics(){
       }
     }
 
-    // 6. Throttle Intervention
+   // 6. Intelligent Throttle Intervention & Closure Classifier
     if(c.throttle && c.throttlePlate){
-      const cuts = sc.rows.filter(r => numeric(r[c.throttle]) && r[c.throttle] >= 85 && numeric(r[c.throttlePlate]) && r[c.throttlePlate] < 75 && (!c.boost || (numeric(r[c.boost]) && r[c.boost] >= 8)));
-      if(cuts.length >= 4){
+      const cuts = sc.rows.filter(r => numeric(r[c.throttle]) && r[c.throttle] >= 85 && numeric(r[c.throttlePlate]) && r[c.throttlePlate] < 75 && (!c.boost || (numeric(r[c.boost]) && r[c.boost] >= 6)));
+      if(cuts.length >= 3){
         const worstCut = cuts.reduce((min, r) => r[c.throttlePlate] < min[c.throttlePlate] ? r : min, cuts[0]);
-        addFinding('bad', 'Throttle Cut / ECU Intervention Detected', `Pedal was pinned (≥85%), but throttle plate closed down to ${fmt(worstCut[c.throttlePlate], 0)}% under boost (${cuts.length} frames).`, worstCut.__idx);
+        
+        // Diagnose root cause
+        let cause = 'ECU Torque Intervention';
+        const err = (c.boost && c.target && numeric(worstCut[c.boost]) && numeric(worstCut[c.target])) ? (worstCut[c.boost] - worstCut[c.target]) : 0;
+        const wheelSpin = (c.wheelFL && c.wheelFR && numeric(worstCut[c.wheelFL]) && numeric(worstCut[c.wheelFR])) ? Math.abs(worstCut[c.wheelFL] - worstCut[c.wheelFR]) : 0;
+
+        if (err >= cfg.overboostThreshold) {
+          cause = `Overboost Protection Closure (Boost +${fmt(err, 1)} PSI over setpoint)`;
+        } else if (wheelSpin > 3.5) {
+          cause = `Traction Control Throttle Cut (${fmt(wheelSpin, 1)} mph front wheel speed delta)`;
+        } else if (c.rpm && worstCut[c.rpm] > 6550) {
+          cause = 'Soft Rev-Limiter / Over-Rev Taper Cut';
+        }
+
+        addFinding('bad', `Throttle Plate Closure: ${cause}`, 
+          `Pedal was floored (≥85%), but throttle plate clamped down to ${fmt(worstCut[c.throttlePlate], 0)}% under boost (${cuts.length} frames affected).`, 
+          worstCut.__idx);
       } else {
-        addFinding('good', 'Clean Throttle Plate Tracking', 'Throttle plate stayed cleanly open with accelerator demand (85%+ mechanical WOT on SIM2K).');
+        addFinding('good', 'Clean Throttle Plate Tracking', 'Throttle plate tracked accelerator pedal demand cleanly without ECU closures.');
       }
     }
 
@@ -1434,15 +2648,42 @@ function renderDiagnostics(){
         wotBoost.forEach(r => {
           const err = r[c.boost] - r[c.target];
           const wg = r[c.wgdc];
-          if(err < -3.0 && wg <= 2.0){ leakFrames++; if(!worstLeakRow || err < (worstLeakRow[c.boost] - worstLeakRow[c.target])) worstLeakRow = r; }
-          if(err > cfg.overboostThreshold && wg >= 30.0){ creepFrames++; if(!worstCreepRow || err > (worstCreepRow[c.boost] - worstCreepRow[c.target])) worstCreepRow = r; }
+
+          // PHYSICAL BOOST LEAK: Actual is >3.0 PSI under target while wastegate duty cycle is pinned shut (>85-95%)
+          if(err < -3.0 && wg >= 85.0){ 
+            leakFrames++; 
+            if(!worstLeakRow || err < (worstLeakRow[c.boost] - worstLeakRow[c.target])) worstLeakRow = r; 
+          }
+          // MECHANICAL BOOST CREEP: Actual is overshooting by >2.5 PSI while ECU dumps wastegate duty (<20%)
+          if(err > cfg.overboostThreshold && wg <= 20.0){ 
+            creepFrames++; 
+            if(!worstCreepRow || err > (worstCreepRow[c.boost] - worstCreepRow[c.target])) worstCreepRow = r; 
+          }
         });
-        if(leakFrames > 8) addFinding('bad', 'Boost Leak / Maxed Turbo Detected', `Boost is under target by >3 PSI while EWGA is pinned shut (WG Command ≤ 2%). Check charge pipes and couplers.`, worstLeakRow?.__idx);
-        else if(creepFrames > 8) addFinding('bad', 'Boost Creep / EWGA Actuator Malfunction', `Boost is overshooting target by >${cfg.overboostThreshold} PSI while EWGA is actively commanding open. Flapper linkage binding.`, worstCreepRow?.__idx);
-        else addFinding('good', 'EWGA Wastegate Control & Sealing', 'Electronic wastegate actuator tracked commanded setpoint cleanly with proper boost regulation.');
+
+        if(leakFrames >= 6) {
+          addFinding('bad', 'Hardware Boost Leak Detected', 
+            `Boost is under target by >3 PSI while wastegate command is pinned shut (${fmt(worstLeakRow[c.wgdc], 0)}% duty). Inspect intercooler couplers, hot pipe, and diverter valve.`, 
+            worstLeakRow?.__idx);
+        } else if(creepFrames >= 6) {
+          addFinding('bad', 'Boost Creep / Actuator Binding', 
+            `Boost exceeds target by >${cfg.overboostThreshold} PSI while wastegate is commanding open (${fmt(worstCreepRow[c.wgdc], 0)}% duty). Check EWGA rod adjustment or exhaust backpressure.`, 
+            worstCreepRow?.__idx);
+        } else {
+          addFinding('good', 'EWGA Wastegate Regulation Verified', 
+            'Wastegate duty cycle balanced properly to track commanded boost setpoint.');
+        }
       }
     }
-
+// 7b. Octane Learning Status Diagnostic
+    const olDiag = diagnoseOctaneLearning(sc.rows, c);
+    if(olDiag.status === 'LEARNED'){
+      addFinding('good', 'Octane Learning Confirmed Active', `ECU targeted full high-octane boost tables (Peak ${fmt(olDiag.peakBoost, 1)} PSI, Mean ${fmt(olDiag.avgBoost, 1)} PSI with ${fmt(olDiag.avgTiming, 1)}° ignition timing).`);
+    } else if(olDiag.status === 'NOT_LEARNED'){
+      addFinding('bad', 'Octane Learning Not Active (15 PSI Cap)', `Boost is limited to stock unlearned table (~${fmt(olDiag.peakBoost, 1)} PSI ceiling). Perform 65–70 mph sustained gear 8/6 highway driving cycle to enable full boost.`);
+    } else if(olDiag.status === 'PARTIAL'){
+      addFinding('warn', 'Octane Learning Intermediate State', `Boost reached ${fmt(olDiag.peakBoost, 1)} PSI, which is between unlearned (15 psi) and learned (19+ psi) parameters.`);
+    }
     // 8. Steady Cruise Fuel Trims
     if(c.stft && c.ltft){
       const activeRows = sc.rows.filter(r => {
@@ -1586,38 +2827,67 @@ function renderDiagnostics(){
 const nb = $('cmp-body');
   if(nb){
     if(!cmp || !pullData || !pullData.length || !cmp.pullData || !cmp.pullData.length){
-      nb.innerHTML = '<tr><td colspan="4" class="text-slate-500">No secondary log loaded for comparison. Click "Compare log" in header to view pull-vs-pull differences.</td></tr>';
-      setTxt('cmp-note', cmp ? 'Both logs need at least one detected pull to compare.' : 'Load a second log with "Compare log" to see pull-vs-pull differences.');
+      nb.innerHTML = '<tr><td colspan="4" class="text-slate-500 py-4 text-center">No secondary log loaded for comparison. Click "Compare log" in header to view pull-vs-pull differences[cite: 8].</td></tr>';
+      setTxt('cmp-note', cmp ? 'Both logs require at least one detected pull to compare[cite: 8].' : 'Load a secondary telemetry log with "Compare log" to benchmark tuning changes[cite: 8].');
+      const badge = $('cmp-status-badge');
+      if(badge){ badge.textContent = 'Awaiting Log B'; badge.className = 'pill neutral text-[9px]'; }
     } else {
       const v = $('pull-select')?.value;
       const i = (v && v !== 'all' && v !== 'none' && pullData[Number(v)]) ? Number(v) : 0;
       const a = pullData[i];
       const b = cmp.pullData[Math.min(i, cmp.pullData.length - 1)];
-      
+      const badge = $('cmp-status-badge');
+      if(badge){ badge.textContent = 'Active A/B'; badge.className = 'pill good text-[9px]'; }
+
       if(a && b){
-        setTxt('cmp-note', `A: ${currentFile} ${a.label}  vs  B: ${cmp.currentFile} ${b.label}.`);
+        setTxt('cmp-note', `Base A: ${currentFile} (${a.label})  vs  Compare B: ${cmp.currentFile} (${b.label})`);
         const m = [
-          ['Boost peak', 'boostPk', 1],
-          ['Boost target peak', 'targetPk', 1],
-          ['Spool Rise Rate (PSI/s)', 'spoolRate', 1],
-          ['3k–6k RPM Sweep (s)', 'splitRpm', 2],
-          ['Lambda min', 'lamMin', 3],
-          ['Max lean vs setpoint', 'lamLean', 3],
-          ['Rail min', 'railMin', 0],
-          ['Rail max', 'railMax', 0],
-          ['Max rail deficit %', 'railPct', 1],
-          ['LPFP min', 'lpfpMin', 0],
-          ['IAT max', 'iatMax', 0],
-          ['Knock min', 'knockMin', 2],
-          ['Torque peak', 'tqPk', 0],
-          [detected.out.hp ? 'ECU power peak' : 'Power peak', 'pwrPk', 0]
+          ['Boost peak', 'boostPk', 1, 'higher_good'],
+          ['Boost target peak', 'targetPk', 1, 'higher_good'],
+          ['Spool Rise Rate (PSI/s)', 'spoolRate', 1, 'higher_good'],
+          ['3k–6k RPM Sweep (s)', 'splitRpm', 2, 'lower_good'],
+          ['Lambda min', 'lamMin', 3, 'neutral'],
+          ['Max lean vs setpoint', 'lamLean', 3, 'lower_good'],
+          ['Rail min', 'railMin', 0, 'higher_good'],
+          ['Rail max', 'railMax', 0, 'higher_good'],
+          ['Max rail deficit %', 'railPct', 1, 'lower_good'],
+          ['LPFP min', 'lpfpMin', 0, 'higher_good'],
+          ['IAT max', 'iatMax', 0, 'lower_good'],
+          ['Knock min', 'knockMin', 2, 'higher_good'],
+          ['Torque peak', 'tqPk', 0, 'higher_good'],
+          [detected.out.hp ? 'ECU power peak' : 'Power peak', 'pwrPk', 0, 'higher_good']
         ];
-        nb.innerHTML = m.map(([l, k, d]) => {
-          const x = a[k], y = b[k];
-          return `<tr><td>${l}</td><td class="font-mono">${fmt(x, d)}</td><td class="font-mono">${fmt(y, d)}</td><td class="font-mono">${numeric(x) && numeric(y) ? fmt(y - x, d) : 'N/A'}</td></tr>`;
+
+        nb.innerHTML = m.map(([label, key, dec, sentiment]) => {
+          const valA = a[key], valB = b[key];
+          let deltaHtml = '<span class="text-slate-500">N/A</span>';
+          
+          if(numeric(valA) && numeric(valB)){
+            const diff = valB - valA;
+            const sign = diff > 0 ? '+' : '';
+            let pillClass = 'delta-neutral';
+            
+            if(Math.abs(diff) > 0.001){
+              if(sentiment === 'higher_good'){
+                pillClass = diff > 0 ? 'delta-good' : 'delta-bad';
+              } else if(sentiment === 'lower_good'){
+                pillClass = diff < 0 ? 'delta-good' : 'delta-bad';
+              }
+            }
+            deltaHtml = `<span class="delta-pill ${pillClass}">${sign}${fmt(diff, dec)}</span>`;
+          }
+
+          return `
+            <tr>
+              <td class="font-medium text-slate-200">${label}</td>
+              <td class="font-mono text-slate-300">${fmt(valA, dec)}</td>
+              <td class="font-mono text-rose-300">${fmt(valB, dec)}</td>
+              <td>${deltaHtml}</td>
+            </tr>
+          `;
         }).join('');
       } else {
-        nb.innerHTML = '<tr><td colspan="4" class="text-slate-500">Selected pull window has no valid sweep comparison.</td></tr>';
+        nb.innerHTML = '<tr><td colspan="4" class="text-slate-500 py-4 text-center">Selected pull window has no valid sweep comparison[cite: 8].</td></tr>';
       }
     }
   }
@@ -1638,7 +2908,7 @@ function renderTrimMap(){
  const c=detected.out, el=$('trim-map'); if(!el) return;
  const key = $('trim-ch')?.value === 'stft' ? c.stft : c.ltft;
  if(!c.rpm || !c.load || !key){
-   el.innerHTML = '<tr><td class="text-slate-500">Needs RPM, Air Mass / Stroke and the selected fuel trim channel.</td></tr>';
+   el.innerHTML = '<tr><td class="text-slate-500 py-6 text-center text-xs">Awaiting RPM, Air Mass / Stroke and fuel trim channel telemetry.</td></tr>';
    return;
  }
 
@@ -1646,7 +2916,7 @@ function renderTrimMap(){
  const rpmEdges = [0, 1500, 2500, 3500, 4500, 5500, 1e9];
  const rpmLabels = ['<1.5k', '1.5-2.5k', '2.5-3.5k', '3.5-4.5k', '4.5-5.5k', '5.5k+'];
  const loadBins = [
-   { label: '<300 (Idle)', min: 0, max: 300 },
+   { label: '<300 mg (Idle)', min: 0, max: 300 },
    { label: '300-550 (Cruise)', min: 300, max: 550 },
    { label: '550-850 (Moderate)', min: 550, max: 850 },
    { label: '850-1200 (Spool)', min: 850, max: 1200 },
@@ -1663,17 +2933,32 @@ function renderTrimMap(){
    (cell[j + '_' + i] = cell[j + '_' + i] || []).push(r[key]);
  });
 
- let h = '<tr><th>Load \\ RPM</th>' + rpmLabels.map(x => `<th>${x}</th>`).join('') + '</tr>';
+ let h = '<tr><th class="text-left font-mono text-slate-400">Load \\ RPM</th>' + rpmLabels.map(x => `<th>${x}</th>`).join('') + '</tr>';
  for(let j = 0; j < loadBins.length; j++){
-   h += `<tr><td class="font-mono text-slate-400 font-semibold">${loadBins[j].label}</td>`;
+   h += `<tr><td class="font-mono text-slate-300 text-xs font-semibold bg-black/40 border border-rose-950/80 px-2 py-1.5">${loadBins[j].label}</td>`;
    for(let i = 0; i < 6; i++){
      const a = cell[j + '_' + i];
      if(!a || a.length < 5){
-       h += '<td class="text-slate-600">-</td>';
+       h += '<td class="trim-matrix-cell text-slate-600 bg-black/30">-</td>';
        continue;
      }
      const m = a.reduce((x, y) => x + y, 0) / a.length;
-     h += `<td class="font-mono" style="background:${m < 0 ? 'rgba(225,29,72,' : 'rgba(244,63,94,'}${Math.min(.6, Math.abs(m) / 12).toFixed(2)})" title="${a.length} samples">${fmt(m, 1)}</td>`;
+     
+     // Blue/Cyan when pulling fuel (negative trim), Crimson/Pink when adding fuel (positive trim)
+     let bg = 'rgba(255,255,255,0.03)';
+     let textColor = '#cbd5e1';
+     const intensity = Math.min(0.75, Math.abs(m) / 10).toFixed(2);
+     
+     if (m < -1.0) {
+       bg = `rgba(14, 165, 233, ${intensity})`;
+       textColor = '#e0f2fe';
+     } else if (m > 1.0) {
+       bg = `rgba(225, 29, 72, ${intensity})`;
+       textColor = '#ffe4e6';
+     }
+
+     const sign = m > 0 ? '+' : '';
+     h += `<td class="trim-matrix-cell cursor-default" style="background:${bg}; color:${textColor};" title="${a.length} discrete samples | Mean: ${sign}${m.toFixed(2)}%">${sign}${fmt(m, 1)}%</td>`;
    }
    h += '</tr>';
  }
@@ -1711,8 +2996,15 @@ function renderAll(){
 }
 
 function renderStats(){
- const data=getWindowRows(),c=detected.out;
- const peak=(key)=>{const x=extrema(key,data);return x?x.max:null;};
+ const data = getWindowRows(), c = detected.out;
+ const peak = (key) => { const x = extrema(key, data); return x ? x.max : null; };
+
+ // Octane Learning Evaluation
+ const ol = diagnoseOctaneLearning(data, c);
+ setTxt('s-ol-status', ol.text);
+ setTxt('s-ol-sub', ol.sub);
+ const dotOl = $('dot-ol');
+ if(dotOl) dotOl.className = `metric-status-dot ${ol.dotColor}`;
  
  const sc = calculateScorecard(data);
  const scEl = $('s-score');
@@ -1721,12 +3013,21 @@ function renderStats(){
    scEl.className = 'text-2xl font-black ' + (sc.score >= 90 ? 'text-rose-400' : sc.score >= 70 ? 'text-amber-400' : 'text-red-500');
    
    const scoreSubEl = $('score-sub');
-   const subText = sc.penalties.length ? sc.penalties[0] : (sc.type === 'WOT' ? 'Telemetry verified clean' : 'Closed-loop cruise healthy');
-   setTxt('s-score-title', sc.type === 'WOT' ? 'WOT Health Score' : 'Cruise Health Score');
+   const subText = sc.penalties.length ? sc.penalties[0] : (sc.type === 'WOT' ? 'Safety audit verified clean' : 'Closed-loop cruise healthy');
+   setTxt('s-score-title', sc.type === 'WOT' ? 'WOT Safety Audit' : 'Cruise Safety Audit');
    if(scoreSubEl){
      scoreSubEl.textContent = subText;
      scoreSubEl.title = subText;
    }
+ }
+
+const hasHp = headers.some(h => /power|horsepower|whp/i.test(h));
+ const hasTq = headers.some(h => /torque|tq/i.test(h));
+ if(!hasHp && !hasTq){
+   setTxt('s-hp-title', 'Power (Unmapped)');
+   setTxt('s-tq-title', 'Torque (Unmapped)');
+   setTxt('s-ecu-hp', c.airflow ? 'Ceiling estimate from airflow, not a measurement' : 'No Power Chan');
+   setTxt('s-ecu-tq', 'No Torque Chan');
  }
 
  const isWheel = $('dyno-mode')?.value === 'wheel';
@@ -1760,8 +3061,8 @@ function renderStats(){
  setTxt('s-railmax', rail?fmt(rail.max,1):'N/A');
  
  const lpfp=extrema(c.lpfp,data);
- setTxt('s-lpfpmin', lpfp?fmt(lpfp.min,1)+' PSI':'N/A');
- if(lpfp) setTxt('lpfp-sub', `Max: ${fmt(lpfp.max,1)} PSI`);
+ setTxt('s-lpfpmin', lpfp ? fmt(lpfp.min, 1) + ' PSI (UNVERIFIED)' : 'N/A');
+ if(lpfp) setTxt('lpfp-sub', `Median: ${lpfpMedianVal} PSI · Max Drop: ${lpfpMaxDrop} PSI`);
 
  const ectVals = nums(data, c.ect);
  const eotVals = nums(data, c.eot);
@@ -1788,6 +3089,27 @@ function renderStats(){
  const ksc=scopeInfo(),kn=knockChannelMinima(ksc.rows);
  setTxt('k-sub', 'Status & DFCO filtered');
  setTxt('s-knock', kn.length?kn.map(x=>`${x.label} ${fmt(x.value,2)}`).join(' · '):'N/A');
+// Micro-LED Status Dot Color Logic
+ const setDot = (id, colorClass) => {
+   const el = $(id);
+   if(el) el.className = `metric-status-dot ${colorClass}`;
+ };
+
+ if(sc.score !== null){
+   setDot('dot-score', sc.score >= 90 ? 'text-emerald-400 bg-emerald-400' : (sc.score >= 70 ? 'text-amber-400 bg-amber-400' : 'text-red-500 bg-red-500'));
+ }
+ 
+ if(rail){
+   const railOk = !rail.min || rail.min >= 2400;
+   setDot('dot-rail', railOk ? 'text-emerald-400 bg-emerald-400' : (rail.min >= 2100 ? 'text-amber-400 bg-amber-400' : 'text-red-500 bg-red-500'));
+ }
+
+ if(lpfp){
+   setDot('dot-lpfp', lpfp.min >= 68 ? 'text-emerald-400 bg-emerald-400' : (lpfp.min >= 58 ? 'text-amber-400 bg-amber-400' : 'text-red-500 bg-red-500'));
+ }
+
+ const worstKnockVal = kn.length ? Math.min(...kn.map(x=>x.value)) : 0;
+ setDot('dot-knock', worstKnockVal > -0.75 ? 'text-emerald-400 bg-emerald-400' : (worstKnockVal > -2.0 ? 'text-amber-400 bg-amber-400' : 'text-red-500 bg-red-500'));
 }
 
 function unitFamily(key){
@@ -1819,9 +3141,31 @@ function unitFamily(key){
 
 function renderChannels(){
  const el=$('channels');if(!el)return;el.innerHTML='';
+ const activeList = [...activeMetrics];
+ setTxt('active-chan-count', `${activeList.length} Active`);
+
  headers.filter(h=>!/^t_ms_/i.test(h)&&h.toLowerCase().includes(($('chan-search')?.value||'').toLowerCase())).forEach(h=>{
-  const b=document.createElement('button');b.className='channel '+(activeMetrics.has(h)?'active':'');b.innerHTML=`<span>${escapeHtml(h)}</span><span class="text-[10px]">${escapeHtml(unitFamily(h))}</span>`;
-  b.onclick=()=>{if(activeMetrics.has(h)){if(activeMetrics.size>1)activeMetrics.delete(h);}else activeMetrics.add(h);renderChannels();renderChart();};el.append(b);
+  const isActive = activeMetrics.has(h);
+  const colorIndex = isActive ? activeList.indexOf(h) % colors.length : -1;
+  const traceColor = colorIndex >= 0 ? colors[colorIndex] : 'transparent';
+  
+  const b=document.createElement('button');
+  b.className='channel '+(isActive ? 'active' : '');
+  b.innerHTML=`
+    <span class="channel-indicator" style="background: ${traceColor};"></span>
+    <span class="truncate pr-1">${escapeHtml(h)}</span>
+    <span class="text-[10px] opacity-75 shrink-0">${escapeHtml(unitFamily(h))}</span>
+  `;
+  b.onclick=()=>{
+    if(activeMetrics.has(h)){
+      if(activeMetrics.size>1) activeMetrics.delete(h);
+    } else {
+      activeMetrics.add(h);
+    }
+    renderChannels();
+    renderChart();
+  };
+  el.append(b);
  });
 }
 
@@ -1844,7 +3188,7 @@ function renderChart(){
      display:true,
      title:{display:true,text:f,color:'#94a3b8'},
      ticks:{color:'#94a3b8'},
-     grid:{drawOnChartArea:i===0,color:'#2b0611'},
+     grid:{drawOnChartArea:i===0, color:'rgba(225, 29, 72, 0.08)'},
      ...(i>1?{offset:true}:{})
    };
  });
@@ -1895,11 +3239,83 @@ onClick:(e, activeEls)=>{
          },
          pan:{enabled:true,mode:'x'}
        },
+       decimation: {
+         enabled: true,
+         algorithm: 'lttb',
+         samples: 1500
+       },
        legend:{labels:{color:'#cbd5e1'}},
-       tooltip:{backgroundColor:'#050103',borderColor:'#4c0519',borderWidth:1}
+       tooltip:{
+         enabled: false,
+         external: function(context) {
+           const tooltipEl = $('chart-hud-tooltip');
+           if (!tooltipEl) return;
+           const tooltipModel = context.tooltip;
+           if (tooltipModel.opacity === 0) {
+             tooltipEl.classList.add('hidden');
+             return;
+           }
+
+           if (tooltipModel.body) {
+             const titleLines = tooltipModel.title || [];
+             const xVal = titleLines[0] || '';
+             const bodyLines = tooltipModel.dataPoints || [];
+             
+             // Extract RPM if available in current row
+             let headerInfo = `⏱ ${xKey}: <b>${xVal}</b>`;
+             const rawRowIdx = bodyLines[0]?.raw?.__rawRow;
+             if (numeric(rawRowIdx) && rows[rawRowIdx]) {
+               const r = rows[rawRowIdx];
+               if (detected.out.rpm && numeric(r[detected.out.rpm])) {
+                 headerInfo += ` · <span class="text-rose-400 font-bold">${r[detected.out.rpm].toLocaleString()} RPM</span>`;
+               }
+             }
+
+             let innerHtml = `<div class="pb-1.5 mb-1.5 border-b border-rose-950/80 font-mono text-[11px] text-slate-300 flex items-center justify-between">${headerInfo}</div>`;
+             innerHtml += '<div class="space-y-0.5">';
+
+             bodyLines.forEach(pt => {
+               const color = pt.dataset.borderColor || '#e11d48';
+               const val = pt.formattedValue || pt.raw?.y || 'N/A';
+               innerHtml += `
+                 <div class="hud-row">
+                   <div class="flex items-center gap-1.5 truncate">
+                     <span class="w-2 h-2 rounded-full shrink-0 shadow-sm" style="background: ${color};"></span>
+                     <span class="text-slate-300 truncate">${escapeHtml(pt.dataset.label)}</span>
+                   </div>
+                   <span class="font-mono font-bold text-white shrink-0">${val}</span>
+                 </div>
+               `;
+             });
+             innerHtml += '</div>';
+
+             tooltipEl.innerHTML = innerHtml;
+           }
+
+           const position = context.chart.canvas.getBoundingClientRect();
+           const parentPos = context.chart.canvas.parentElement.getBoundingClientRect();
+           tooltipEl.classList.remove('hidden');
+
+           // Position tooltip dynamically with boundary guard (prevents negative offset clipping)
+           let leftPos = tooltipModel.caretX + 16;
+           const tooltipWidth = 260;
+           if (leftPos + tooltipWidth > parentPos.width) {
+             leftPos = Math.max(10, tooltipModel.caretX - (tooltipWidth + 16));
+           }
+
+           let topPos = tooltipModel.caretY - 20;
+           if (topPos < 10) topPos = 10;
+           if (topPos + 200 > parentPos.height) {
+             topPos = Math.max(10, parentPos.height - 210);
+           }
+
+           tooltipEl.style.left = Math.round(leftPos) + 'px';
+           tooltipEl.style.top = Math.round(topPos) + 'px';
+         }
+       }
      },
      scales:{
-       x:{type:'linear',ticks:{color:'#94a3b8',maxTicksLimit:14},grid:{color:'#2b0611'},title:{display:true,text:xKey,color:'#94a3b8'}},
+       x:{type:'linear',ticks:{color:'#94a3b8',maxTicksLimit:14},grid:{color:'rgba(225, 29, 72, 0.12)'},title:{display:true,text:xKey,color:'#94a3b8'}},
        ...scales
      }
    }
@@ -1963,8 +3379,13 @@ function extractDynoSweep(targetRows, c, cfg, lossFactor, saeMode){
      tq.push({x: rpm, y: val});
      if(val > pkTq.val) pkTq = {val, rpm};
    }
-   if(c.airflow && numeric(r[c.airflow])){
-     const val = +(r[c.airflow] * 10.0 * lossFactor * saeCf).toFixed(1);
+   let flowLbMin = (c.airflow && numeric(r[c.airflow])) ? r[c.airflow] : null;
+   if(flowLbMin === null && c.load && numeric(r[c.load])){
+     const mg = r[c.load] < 50 ? r[c.load] * 1000 : r[c.load];
+     flowLbMin = (mg * rpm * 2) / 453592.37;
+   }
+   if(flowLbMin !== null && Number.isFinite(flowLbMin)){
+     const val = +(flowLbMin * 10.0 * lossFactor * saeCf).toFixed(1);
      flow.push({x: rpm, y: val});
      if(val > pkFlow.val) pkFlow = {val, rpm};
    }
@@ -2299,10 +3720,19 @@ const baroInputVal = Number($('comp-baro-override')?.value);
  if(numeric(baroInputVal) && baroInputVal >= 10.0 && baroInputVal <= 16.0){
    ambientBaroPsi = baroInputVal;
  }
- const pullRows = getWindowRows().filter(r => (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor)) && numeric(r[c.boost]) && numeric(r[c.rpm]));
+const windowData = getWindowRows();
+ // If a pull focus is active, use all rows of that pull; if "Entire log" is active, filter for WOT rows (or positive boost if daily)
+ const isPullFocused = $('pull-select')?.value && $('pull-select').value !== 'all';
+ const pullRows = windowData.filter(r => {
+   if(!numeric(r[c.rpm]) || !numeric(r[c.boost])) return false;
+   if(isPullFocused) return true;
+   const th = (c.throttle && numeric(r[c.throttle])) ? r[c.throttle] : 100;
+   return th >= cfg.wotFloor || r[c.boost] > 2.0;
+ });
  const compPts = [];
 
  let maxPrObs = 0, maxFlowObs = 0, peakEffObs = 0, peakIcEffObs = 0;
+ const icDrop = Number($('comp-ic-drop')?.value) || 1.0;
 
  pullRows.forEach(r => {
    const boost = r[c.boost];
@@ -2313,16 +3743,23 @@ const baroInputVal = Number($('comp-baro-override')?.value);
    if(c.airflow && numeric(r[c.airflow])){
      airflowLbMin = r[c.airflow];
    } else if(c.load && numeric(r[c.load])){
-     // Theta II 2.0T: 4 cylinders = 2 intake events per revolution
-     // Airflow (lb/min) = [Air Mass (mg/stroke) * RPM * 2 strokes/rev] / [453,592.37 mg/lb]
      const mgStroke = r[c.load] < 50 ? r[c.load] * 1000 : r[c.load];
      airflowLbMin = +((mgStroke * rpm * 2) / 453592.37).toFixed(2);
+   } else if(c.hp && numeric(r[c.hp])){
+     airflowLbMin = +(r[c.hp] / 10.0).toFixed(2);
+   } else if(c.tq && numeric(r[c.tq]) && numeric(rpm)){
+     const estHp = (r[c.tq] * rpm) / 5252;
+     airflowLbMin = +(estHp / 10.0).toFixed(2);
    }
+
+// Ignore trailing off-throttle deceleration fuel cut / deep vacuum
+ if(boost < -4.0 && airflowLbMin < 3.0) return;
 
    const flowRatio = Math.max(0, Math.min(1.2, airflowLbMin / spec.maxFlow));
    const deltaPInlet = 0.45 + (flowRatio * flowRatio * 0.75);
    const pInlet = Math.max(12.0, ambientBaroPsi - deltaPInlet);
-   const pr = (boost + ambientBaroPsi) / pInlet;
+   const pCompOut = Math.max(pInlet, boost + ambientBaroPsi + icDrop);
+   const pr = Math.max(1.0, +(pCompOut / pInlet).toFixed(3));
 
    const effC = interpolateCompressorEff(airflowLbMin, pr, spec);
    const iatVal = (c.iat && numeric(r[c.iat])) ? r[c.iat] : 85.0;
@@ -2333,8 +3770,7 @@ const baroInputVal = Number($('comp-baro-override')?.value);
    const tAmbientF = 77.0;
    const icEff = Math.max(0, Math.min(100, ((tDischargeF - iatVal) / Math.max(10, tDischargeF - tAmbientF)) * 100));
 
-   if(pr >= 1.0 && pr <= (spec.maxPr + 0.3) && airflowLbMin > 4 && airflowLbMin <= (spec.maxFlow + 5)){
-     compPts.push({
+   if(pr >= 1.0 && pr <= (spec.maxPr + 0.6) && airflowLbMin > 0.2 && airflowLbMin <= (spec.maxFlow + 10)){    compPts.push({
        x: +airflowLbMin.toFixed(2),
        y: +pr.toFixed(3),
        rpm,
@@ -2358,7 +3794,7 @@ const baroInputVal = Number($('comp-baro-override')?.value);
  setTxt('comp-pk-flow', maxFlowObs > 0 ? `${maxFlowObs.toFixed(1)} lb/min` : 'N/A');
  setTxt('comp-pk-eff', peakEffObs > 0 ? `${peakEffObs.toFixed(0)}%` : 'N/A');
  setTxt('comp-ic-eff', peakIcEffObs > 0 ? `${peakIcEffObs}%` : 'N/A');
- setTxt('comp-pk-flow-sub', `Limit: ${spec.maxFlow} lb/min (${spec.name})`);
+setTxt('comp-pk-pr-sub', `Inlet & ${icDrop.toFixed(1)} PSI IC drop accounted`);
 
  const datasets = [];
 
@@ -2473,21 +3909,21 @@ const baroInputVal = Number($('comp-baro-override')?.value);
      animation: false,
      scales: {
        x: {
-         type: 'linear',
-         title: { display: true, text: 'Corrected Compressor Mass Flow (lb/min)', color: '#94a3b8', font: { weight: '600' } },
-         min: 0,
-         max: spec.maxFlow + 2,
-         ticks: { color: '#94a3b8', stepSize: 5 },
-         grid: { color: '#2b0611' }
-       },
-       y: {
-         type: 'linear',
-         title: { display: true, text: `Compressor Pressure Ratio (P_R @ ${ambientBaroPsi.toFixed(2)} PSI Baro)`, color: '#94a3b8', font: { weight: '600' } },
-         min: 1.0,
-         max: spec.maxPr,
-         ticks: { color: '#94a3b8', stepSize: 0.25 },
-         grid: { color: '#2b0611' }
-       }
+       type: 'linear',
+       title: { display: true, text: 'Corrected Compressor Mass Flow (lb/min)', color: '#94a3b8', font: { weight: '600' } },
+       min: 0,
+       max: Math.ceil((Math.max(spec.maxFlow, maxFlowObs) + 2) / 5) * 5,
+       ticks: { color: '#94a3b8', stepSize: 5 },
+       grid: { color: 'rgba(225, 29, 72, 0.08)' }
+     },
+     y: {
+       type: 'linear',
+       title: { display: true, text: `Compressor Pressure Ratio (P_R @ ${ambientBaroPsi.toFixed(2)} PSI Baro)`, color: '#94a3b8', font: { weight: '600' } },
+       min: 1.0,
+       max: +(Math.max(spec.maxPr, maxPrObs) + 0.15).toFixed(2),
+       ticks: { color: '#94a3b8', stepSize: 0.25 },
+       grid: { color: 'rgba(225, 29, 72, 0.08)' }
+     }
      },
      plugins: {
        legend: {
@@ -2507,7 +3943,7 @@ const baroInputVal = Number($('comp-baro-override')?.value);
              const p = ctx.raw;
              if(!p.effC) return `${ctx.dataset.label}: ${p.x} lb/min @ P_R ${p.y}`;
              return [
-               `Flow: ${p.x} lb/min @ P_R ${p.y} (${fmt(p.boost, 1)} PSI)`,
+               `Flow: ${p.x} lb/min (Cylinder Ingested) @ P_R ${p.y} (${fmt(p.boost, 1)} PSI MAP)`,
                `Engine: ${fmt(p.rpm, 0)} RPM · WG Command: ${fmt(p.wgdc, 0)}%`,
                `Estimated Efficiency: ${p.effC}%`,
                `Discharge: ~${p.tDischarge}°F -> Manifold IAT: ${p.iat}°F`,
@@ -2631,17 +4067,17 @@ function renderPreview(){
        if(h === c.timing && v <= -5.0 && c.throttle && numeric(r[c.throttle]) && r[c.throttle] < 3.0){
          return `<td class="text-amber-400 bg-amber-950/40 font-bold">${v.toFixed(1)}° (Crackle)</td>`;
        }
-       if(h === c.throttle && v >= cfg.wotFloor){
-         return `<td class="text-rose-400 font-bold">${v.toFixed(0)}%</td>`;
+      if(h === c.throttle && v >= cfg.wotFloor){
+         return `<td><span class="px-1.5 py-0.5 rounded bg-rose-950/60 border border-rose-800/80 text-rose-300 font-bold text-[11px]">${v.toFixed(0)}%</span></td>`;
        }
        if(h === c.rail && c.railTarget && numeric(r[c.railTarget]) && r[c.railTarget] > 0){
          const defPct = ((r[c.railTarget] - v) / r[c.railTarget]) * 100;
          if(defPct >= cfg.railA){
-           return `<td class="text-amber-300 bg-amber-950/30">${v.toFixed(0)}</td>`;
+           return `<td><span class="px-1.5 py-0.5 rounded bg-amber-950/50 border border-amber-800/80 text-amber-200 font-mono text-[11px]">${v.toFixed(0)}</span></td>`;
          }
        }
        if(h === c.lpfp && v < cfg.lpfpFloor){
-         return `<td class="text-rose-400 bg-rose-950/60 font-bold">${v.toFixed(1)}</td>`;
+         return `<td><span class="px-1.5 py-0.5 rounded bg-rose-950/80 border border-rose-600 text-rose-300 font-bold font-mono text-[11px]">${v.toFixed(1)}</span></td>`;
        }
        if(h === c.lambda && numeric(r[c.boost]) && r[c.boost] >= 15 && (!c.throttle || (numeric(r[c.throttle]) && r[c.throttle] >= cfg.wotFloor))){
          const tgt = (c.lambdaTarget && numeric(r[c.lambdaTarget])) ? r[c.lambdaTarget] : 0.80;
@@ -2880,6 +4316,34 @@ if($('sample-btn')) $('sample-btn').onclick=sampleWot;
 if($('sample-daily-btn')) $('sample-daily-btn').onclick=sampleDaily;
 if($('sample-empty')) $('sample-empty').onclick=sampleWot;
 if($('sample-daily-empty')) $('sample-daily-empty').onclick=sampleDaily;
+// Native Window Drag-and-Drop Ingestion
+window.addEventListener('dragover', e => {
+  e.preventDefault();
+  const emptyEl = $('empty');
+  if(emptyEl) emptyEl.classList.add('dropzone-active');
+});
+window.addEventListener('dragleave', e => {
+  if(e.clientX === 0 || e.clientY === 0){
+    const emptyEl = $('empty');
+    if(emptyEl) emptyEl.classList.remove('dropzone-active');
+  }
+});
+window.addEventListener('drop', async e => {
+  e.preventDefault();
+  const emptyEl = $('empty');
+  if(emptyEl) emptyEl.classList.remove('dropzone-active');
+  const file = e.dataTransfer?.files?.[0];
+  if(!file) return;
+  cmp = null;
+  try {
+    let t = await file.text();
+    parseText(t, file.name);
+    saveHistory();
+    renderHistory();
+  } catch(err){
+    alert('Could not parse dropped log: ' + err.message);
+  }
+});
 
 if($('cmp-input')) $('cmp-input').addEventListener('change',async e=>{
  const f=e.target.files?.[0];if(!f)return;
@@ -2910,7 +4374,63 @@ if($('file-input')) $('file-input').addEventListener('change',async e=>{
  }catch(err){alert('Could not parse log: '+err.message);}
  e.target.value='';
 });
+// ?selftest Deterministic Validation Suite (Requirements A and B)
+function runSelfTest(){
+  // Excerpt 1: Global Retard (All 4 channels equal to -2.625)
+  const caseA1 = [{
+    Time_s: 0.1, Engine_RPM: 3200, Boost_Actual_PSI: 18.0, Throttle_Position_pct: 100, Current_Gear: 3,
+    Knock_Retard_Cyl1_deg: -2.625, Knock_Retard_Cyl2_deg: -2.625, Knock_Retard_Cyl3_deg: -2.625, Knock_Retard_Cyl4_deg: -2.625
+  }];
 
+  // Excerpt 2: Channel B held at -3.0 for 60 rows at 16 Hz (~3.75s) under boost 19 PSI
+  const caseA2 = [];
+  for(let i=0; i<60; i++){
+    caseA2.push({
+      Time_s: +(i*0.062).toFixed(3), Engine_RPM: 4000+i*15, Boost_Actual_PSI: 19.0, Throttle_Position_pct: 100, Current_Gear: 3,
+      Knock_Retard_Cyl1_deg: 0.0, Knock_Retard_Cyl2_deg: -3.0, Knock_Retard_Cyl3_deg: 0.0, Knock_Retard_Cyl4_deg: 0.0
+    });
+  }
+
+  // Excerpt 3: Pull with powered peak at row 34 (RPM 5554) followed by 3 clutch-in flare rows (RPM 6102, Pedal 0)
+  const caseB = [];
+  for(let i=0; i<35; i++){
+    caseB.push({
+      Time_s: +(i*0.062).toFixed(3), Engine_RPM: 2500 + i * 89.8, Boost_Actual_PSI: 19.5, Throttle_Position_pct: 100, Current_Gear: 3
+    });
+  }
+  // Clutch-in flare rows (pedal 0, RPM flaring up 800 rpm above powered peak)
+  for(let i=0; i<3; i++){
+    caseB.push({
+      Time_s: +( (35+i)*0.062 ).toFixed(3), Engine_RPM: 5554 + 400 + i * 150, Boost_Actual_PSI: 4.0, Throttle_Position_pct: 0, Current_Gear: 3
+    });
+  }
+
+  const dummyChannels = {
+    time: 'Time_s', rpm: 'Engine_RPM', boost: 'Boost_Actual_PSI', throttle: 'Throttle_Position_pct', gear: 'Current_Gear',
+    knock1: 'Knock_Retard_Cyl1_deg', knock2: 'Knock_Retard_Cyl2_deg', knock3: 'Knock_Retard_Cyl3_deg', knock4: 'Knock_Retard_Cyl4_deg'
+  };
+
+  // Test Case A1
+  classifyKnockAndEvents(caseA1, dummyChannels);
+  const passA1 = (globalIgnitionRetardCount === 1) && (cylinderKnockEvents.length === 0);
+
+  // Test Case A2
+  classifyKnockAndEvents(caseA2, dummyChannels);
+  const passA2 = (cylinderKnockEvents.length === 1) && (cylinderKnockEvents[0].cylinder === 'B') && (cylinderKnockEvents[0].peak === -3.0) && (cylinderKnockEvents[0].durationSec >= 3.5);
+
+  // Test Case B
+  const pullRes = detectPulls(caseB, dummyChannels);
+  const passB = (pullRes.length === 1) && (pullRes[0].end === 34) && (caseB[pullRes[0].end].Engine_RPM <= 5600);
+
+  const report = `?selftest Suite Results:\n` +
+    `1. Global Retard Row (Case A1 -2.625°): ${passA1 ? 'PASS' : 'FAIL'}\n` +
+    `2. Cylinder-B Held Retard (Case A2 -3.0° 60 rows): ${passA2 ? 'PASS' : 'FAIL'}\n` +
+    `3. Pull Window Flare Cut (Case B ends at powered row 35): ${passB ? 'PASS' : 'FAIL'}`;
+
+  alert(report);
+}
+
+if($('selftest-btn')) $('selftest-btn').onclick = runSelfTest;
 if($('report-btn')) $('report-btn').onclick=exportReport;
 if($('reset-chart')) $('reset-chart').onclick=()=>{if(chart&&chart.resetZoom)chart.resetZoom();else renderChart();};
 if($('chan-search')) $('chan-search').oninput=()=>renderChannels();
@@ -2920,39 +4440,109 @@ if($('scorecard-tile')) $('scorecard-tile').onclick = () => {
   const listEl = $('score-breakdown-list');
   if(!listEl) return;
   listEl.innerHTML = '';
-  
-  const baseItem = document.createElement('div');
-  baseItem.className = 'flex justify-between items-center text-slate-300 font-medium py-1';
-  baseItem.innerHTML = `<span>Baseline Healthy ${sc.type} Run</span><span class="text-rose-400 font-mono">100 pts</span>`;
-  listEl.append(baseItem);
+
+  const finalScore = sc.score !== null ? sc.score : 100;
+  setTxt('modal-final-score', finalScore);
+  setTxt('modal-audit-title', `${sc.type === 'WOT' ? 'WOT Full Load' : 'Closed-Loop Cruise'} Safety Audit`);
+  setTxt('modal-audit-subtitle', `${sc.penalties.length} Deduction Flag(s) Recorded`);
+
+  // Animate SVG Radial Gauge (Circumference of r=40 is ~251.32)
+  const ring = $('modal-gauge-ring');
+  if(ring){
+    const circumference = 251.32;
+    const offset = circumference - (Math.max(0, Math.min(100, finalScore)) / 100) * circumference;
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = finalScore >= 90 ? '#34d399' : (finalScore >= 70 ? '#fbbf24' : '#f43f5e');
+  }
+
+  const scoreNumEl = $('modal-final-score');
+  if(scoreNumEl){
+    scoreNumEl.className = `text-3xl font-black font-mono tracking-tight ${finalScore >= 90 ? 'text-emerald-400' : (finalScore >= 70 ? 'text-amber-400' : 'text-rose-500')}`;
+  }
 
   if(!sc.penalties.length){
-    const cleanItem = document.createElement('div');
-    cleanItem.className = 'p-3 bg-rose-950/40 border border-rose-800/40 rounded text-rose-300 text-xs mt-2';
-    cleanItem.textContent = sc.type === 'WOT' 
-      ? 'Zero penalties incurred. Ignition ramp, fuel delivery, boost tracking, and HPFP/LPFP feed hold within platform safety thresholds.'
-      : 'Zero penalties incurred. Closed-loop fuel trims, thermostat regulation, oil temperature, and cam modulation hold within healthy daily cruising parameters.';
-    listEl.append(cleanItem);
+    const cleanCard = document.createElement('div');
+    cleanCard.className = 'audit-cat-card flex items-start gap-3 bg-emerald-950/20 border-emerald-800/40 text-emerald-300';
+    cleanCard.innerHTML = `
+      <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+      <div class="space-y-0.5 text-xs">
+        <div class="font-bold text-white">Full Safety Audit Passed (100 / 100)</div>
+        <p class="text-slate-300 leading-relaxed">${sc.type === 'WOT' 
+          ? 'Zero point deductions incurred. Ignition advance ramps, wideband lambda tracking, turbo spool regulation, and high/low pressure fuel feed held reliably within platform safety limits.'
+          : 'Zero point deductions incurred. Closed-loop fuel trim adaptation, thermostat regulation, oil temperatures, and variable valve timing phasers are functioning normally.'}</p>
+      </div>
+    `;
+    listEl.append(cleanCard);
   } else {
+    // Categorize penalties
+    const categories = {
+      'Ignition & Knock': { icon: 'zap', color: 'text-amber-400', items: [] },
+      'Fuel Delivery & Rails': { icon: 'fuel', color: 'text-rose-400', items: [] },
+      'Boost & Pressure': { icon: 'gauge', color: 'text-cyan-400', items: [] },
+      'Thermal & Calibration': { icon: 'thermometer', color: 'text-emerald-400', items: [] }
+    };
+
     sc.penalties.forEach(p => {
-      const pItem = document.createElement('div');
-      pItem.className = 'flex justify-between items-center text-rose-300 bg-rose-950/30 p-2 rounded border border-rose-900/40 font-mono text-xs';
-      pItem.textContent = p;
-      listEl.append(pItem);
+      if(/knock|detonation|retard|timing/i.test(p)){
+        categories['Ignition & Knock'].items.push(p);
+      } else if(/fuel|rail|hpfp|lpfp|lean|lambda|trim/i.test(p)){
+        categories['Fuel Delivery & Rails'].items.push(p);
+      } else if(/boost|overboost|spool|wastegate/i.test(p)){
+        categories['Boost & Pressure'].items.push(p);
+      } else {
+        categories['Thermal & Calibration'].items.push(p);
+      }
+    });
+
+    Object.entries(categories).forEach(([catTitle, catData]) => {
+      if(!catData.items.length) return;
+      const catCard = document.createElement('div');
+      catCard.className = 'audit-cat-card space-y-1.5';
+      
+      let itemsHtml = catData.items.map(itemStr => {
+        const parts = itemStr.split(':');
+        const desc = parts[0] || itemStr;
+        const pts = parts[1] || '';
+        return `
+          <div class="flex items-center justify-between text-xs py-1 border-b border-rose-950/40 last:border-0 font-mono">
+            <span class="text-slate-300 truncate pr-2">${escapeHtml(desc)}</span>
+            <span class="text-rose-400 font-bold shrink-0">${escapeHtml(pts)}</span>
+          </div>
+        `;
+      }).join('');
+
+      catCard.innerHTML = `
+        <div class="flex items-center gap-2 pb-1 border-b border-rose-950/70">
+          <i data-lucide="${catData.icon}" class="w-3.5 h-3.5 ${catData.color}"></i>
+          <span class="font-bold text-white text-xs">${catTitle}</span>
+        </div>
+        <div>${itemsHtml}</div>
+      `;
+      listEl.append(catCard);
     });
   }
 
-  setTxt('modal-audit-title', `${sc.type === 'WOT' ? 'WOT Performance' : 'Daily Commute'} Health Audit Breakdown`);
-  setTxt('modal-final-score', `${sc.score !== null ? sc.score : '--'} / 100`);
-  if($('modal-final-score')) $('modal-final-score').className = `text-xl font-black ${sc.score >= 90 ? 'text-rose-400' : sc.score >= 70 ? 'text-amber-400' : 'text-red-500'}`;
-  if($('score-modal')) $('score-modal').classList.remove('hidden');
+  const modalEl = $('score-modal');
+  if(modalEl){
+    modalEl.style.display = 'flex';
+  }
+  if(window.lucide) lucide.createIcons();
 };
 
-if($('close-score-modal')) $('close-score-modal').onclick = () => $('score-modal')?.classList.add('hidden');
-if($('score-modal')) $('score-modal').onclick = (e) => { if(e.target === $('score-modal')) $('score-modal')?.classList.add('hidden'); };
+const hideScoreModal = () => {
+  const modalEl = $('score-modal');
+  if(modalEl){
+    modalEl.style.display = 'none';
+  }
+};
 
-const settingIds = ['rail-a','rail-b','rail-n','lpfp-floor','knock-floor','lambda-margin','overboost-threshold','wot-threshold','elsd-tolerance','shift-window','fuel-profile'];
+if($('close-score-modal')) $('close-score-modal').onclick = hideScoreModal;
+if($('modal-close-btn')) $('modal-close-btn').onclick = hideScoreModal;
+if($('score-modal')) $('score-modal').onclick = (e) => { 
+  if(e.target === $('score-modal')) hideScoreModal(); 
+};
 
+const settingIds = ['rail-a','rail-b','rail-n','lpfp-floor','knock-floor','lambda-margin','overboost-threshold','wot-threshold','elsd-tolerance','shift-window','fuel-profile','trans-type','comp-ic-drop','tune-profile'];
 function loadSavedSettings(){
  try{
    const saved = JSON.parse(localStorage.getItem('elantraCalSettings') || 'null');
@@ -2988,7 +4578,7 @@ function saveCurrentSettings(){
 settingIds.forEach(id => {
   const el = $(id);
   if(!el) return;
-  el.oninput = () => {
+  const handler = () => {
     saveCurrentSettings();
     if(rows.length){
       pulls = detectPulls(rows, detected.out);
@@ -2996,6 +4586,8 @@ settingIds.forEach(id => {
       renderAll();
     }
   };
+  el.oninput = handler;
+  el.onchange = handler;
 });
 
 if($('reset-settings-btn')){
@@ -3006,10 +4598,12 @@ if($('reset-settings-btn')){
     if($('rail-n')) $('rail-n').value = '5';
     if($('lpfp-floor')) $('lpfp-floor').value = '70.0';
     if($('fuel-profile')) $('fuel-profile').value = 'e10';
+    if($('trans-type')) $('trans-type').value = 'mt';
     if($('knock-floor')) $('knock-floor').value = '-0.75';
     if($('lambda-margin')) $('lambda-margin').value = '0.040';
     if($('overboost-threshold')) $('overboost-threshold').value = '2.5';
     if($('wot-threshold')) $('wot-threshold').value = '75';
+    if($('comp-ic-drop')) $('comp-ic-drop').value = '1.00';
     if($('elsd-tolerance')) $('elsd-tolerance').value = '250';
     if($('shift-window')) $('shift-window').value = '1.0';
     saveCurrentSettings();
@@ -3064,6 +4658,7 @@ if($('dyno-knock-toggle')) $('dyno-knock-toggle').onchange = renderEcuPower;
 if($('comp-turbo-profile')) $('comp-turbo-profile').onchange = renderCompressorMap;
 if($('comp-color-mode')) $('comp-color-mode').onchange = renderCompressorMap;
 if($('comp-spline-toggle')) $('comp-spline-toggle').onchange = renderCompressorMap;
+if($('comp-ic-drop')) $('comp-ic-drop').oninput = renderCompressorMap;
 if($('comp-baro-override')) $('comp-baro-override').oninput = () => {
   setTxt('baro-source-tag', '(Custom)');
   renderCompressorMap();
@@ -3098,10 +4693,17 @@ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
    if(!chart) renderChart();
    else chart.resize();
  }
- if(b.dataset.tab==='power-panel')renderEcuPower();
- if(b.dataset.tab==='compressor-panel')renderCompressorMap();
- if(b.dataset.tab==='data-panel')renderPreview();
- if(b.dataset.tab==='diag-panel')renderDiagnostics();
+ if(b.dataset.tab==='power-panel') renderEcuPower();
+ if(b.dataset.tab==='compressor-panel'){
+   if(!compressorChart) renderCompressorMap();
+   else {
+     compressorChart.resize();
+     renderCompressorMap();
+   }
+ }
+ if(b.dataset.tab==='data-panel') renderPreview();
+ if(b.dataset.tab==='diag-panel') renderDiagnostics();
+ if(window.lucide) lucide.createIcons();
 });
 
 if(window.lucide)lucide.createIcons();
